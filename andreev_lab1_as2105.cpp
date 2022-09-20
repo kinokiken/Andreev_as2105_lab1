@@ -1,5 +1,6 @@
 #include <iostream>
 #include <string>
+#include <cmath>
 
 using namespace std;
 
@@ -28,12 +29,12 @@ int main()
 
     while (MenuChoice)
     {
-        cout << " 1. Добавить трубу \n 2. Добавить КС \n 3. Просмотр всех объектов \n 4. Редактировать трубу \n 5. Редактировать КС \n 6. Сохранить \n 7. Загрузить \n 0. Выход"<<endl;
+        cout << " 1. Добавить трубу \n 2. Добавить КС \n 3. Просмотр всех объектов \n 4. Редактировать трубу \n 5. Редактировать КС \n 6. Сохранить \n 7. Загрузить \n 0. Выход \n"<<endl;
         cin >> MenuChoice;  
 
         if (MenuChoice == 1)
         {
-            cout << "Задайте длину трубы:" << endl;
+            cout << "\nЗадайте длину трубы:" << endl;
             cin >> pipe.length;
             while ((!pipe.length) || (pipe.length <=0))
             {
@@ -64,9 +65,10 @@ int main()
             cout << "\n Вы успешно задали параметры трубы, возвращаем Вас в меню" << endl << endl;
         }
 
+
         else if (MenuChoice == 2)
         {
-            cout << "Задайте название компрессорной станции:" << endl;
+            cout << "\nЗадайте название компрессорной станции:" << endl;
             cin >> cs.name;
             while (cs.name == "")
             {
@@ -109,17 +111,79 @@ int main()
                     }
             }
 
-            cout << "Задайте эффективность компрессорной станции:" << endl;
+            cout << "Задайте коэффициент эффективности цеха компрессорной станции:" << endl;
             cin >> cs.efficiency;
             while ((!cs.efficiency) || (cs.efficiency <= 0))
             {
-                cout << "Задайте корректное значение эффективности компрессорной станции:" << endl;
+                cout << "Задайте корректное значение эффективности цеха компрессорной станции:" << endl;
                 cin.clear();
                 cin.ignore(INT_MAX,'\n');
                 cin >> cs.efficiency;
             }
+            cs.efficiency*=(pow(1.5,cs.WorkingNum));
 
             cout << "\n Вы успешно задали параметры компрессорной станции, возвращаем Вас в меню" << endl << endl;
+        }
+
+
+        else if (MenuChoice == 3)
+        {
+            if (!pipe.diameter)
+            {
+                cout << "\n Параметры трубы не добавлены\n";
+            }
+            else
+            {
+                if (pipe.repair == false)
+                {
+                    cout << "\n Параметры трубы:\n" << "\n Длина трубы: " << pipe.length << "\n Диаметр трубы: " << pipe.diameter;
+                    cout << "\n Труба находится в ремонте" << endl;
+                }
+                else
+                {
+                    cout << "\n Параметры трубы:\n" << "\n Длина трубы: " << pipe.length << "\n Диаметр трубы: " << pipe.diameter;
+                    cout << "\n Труба находится в работе" << endl;
+                }
+            }
+
+            if (!cs.WorkshopsNum)
+            {
+                cout << "\n Параметры компрессорной станции не добавлены\n" << endl;
+            }
+            else
+            {
+                cout << "\n Параметры компрессорной станции:\n" << "\n Название компрессорной станции: " << cs.name;
+                cout << "\n Количество цехов компрессорной станции: " << cs.WorkshopsNum;
+                cout << "\n Количество работающих цехов компрессорной станции: " << cs.WorkingNum;
+                cout << "\n Эффективность компрессорной станции: " <<  cs.efficiency << endl << endl;
+            }
+        }
+
+        else if (MenuChoice == 4)
+        {
+            if ((!pipe.repair) && (!pipe.diameter))
+            {
+                cout << "\n Для редактирования состояния трубы сначала введите параметры трубы \n" << endl;
+            }
+            else if (pipe.repair == true)
+            {
+                pipe.repair = false;
+                cout << "\n Труба отправлена в ремонт \n" << endl;
+            }
+            else
+            {
+                pipe.repair = true;
+                cout << "\n Труба поставлена на работу \n" << endl;
+            }
+        }
+
+        else if (MenuChoice == 5)
+        {
+            if (!cs.WorkshopsNum)
+            {
+                cout << "\n Для редактирования цехов сначала введите параметры компрессорной станции\n" << endl;
+            }
+            
         }
     }
 
