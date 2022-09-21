@@ -19,6 +19,26 @@ struct CStation
     float efficiency;
 };
 
+float PipeLengthGet();
+
+float PipeDiameterGet();
+
+bool PipeRepairGet();
+
+string CsNameGet();
+
+int CsWorkshopsAmount();
+
+int CsWorkingAmount(int workshops);
+
+float CsEfficiency(int workshops, int working);
+
+bool PipeEdit (bool repair, float diameter);
+
+int CsEdit (int workshops, int working);
+
+void PipeCsParameters (float diameter, bool repair,float length, int workshops, string name, int working, float efficiency);
+
 int main()
 {
     setlocale(LC_ALL, "rus");
@@ -29,163 +49,272 @@ int main()
 
     while (MenuChoice)
     {
-        cout << " 1. Добавить трубу \n 2. Добавить КС \n 3. Просмотр всех объектов \n 4. Редактировать трубу \n 5. Редактировать КС \n 6. Сохранить \n 7. Загрузить \n 0. Выход \n"<<endl;
+        cout << "\n 1. Добавить трубу \n 2. Добавить КС \n 3. Просмотр всех объектов \n 4. Редактировать трубу \n 5. Редактировать КС \n 6. Сохранить \n 7. Загрузить \n 0. Выход \n"<<endl;
         cin >> MenuChoice;  
 
         if (MenuChoice == 1)
         {
-            cout << "\nЗадайте длину трубы:" << endl;
-            cin >> pipe.length;
-            while ((!pipe.length) || (pipe.length <=0))
-            {
-                cout << "Задайте корректную длину трубы:" << endl;
-                cin.clear();
-                cin.ignore(INT_MAX,'\n');
-                cin >> pipe.length;
-            }
+            pipe.length = PipeLengthGet();
 
-            cout << "Задайте диаметр трубы:" << endl;
-            cin >> pipe.diameter;
-            while ((!pipe.diameter) || (pipe.diameter <=0))
-            {
-                cout << "Задайте корректный диаметр трубы:" << endl;
-                cin.clear();
-                cin.ignore(INT_MAX,'\n');
-                cin >> pipe.diameter;
-            }
+            pipe.diameter = PipeDiameterGet();
 
-            cout << "Находится ли эта труба в ремонте? 0-да, 1-нет" << endl;
-            while (!(cin>>pipe.repair))
-            {
-                cout << "Введите 0, если труба находится в ремонте; 1, если труба исправна" << endl;
-                cin.clear();
-                cin.ignore(INT_MAX,'\n');
-            }
-
-            cout << "\n Вы успешно задали параметры трубы, возвращаем Вас в меню" << endl << endl;
+            pipe.repair = PipeRepairGet();
         }
-
 
         else if (MenuChoice == 2)
         {
-            cout << "\nЗадайте название компрессорной станции:" << endl;
-            cin >> cs.name;
-            while (cs.name == "")
-            {
-                cout << "Задайте корректное название компрессорной станции:" << endl;
-                cin.clear();
-                cin.ignore(INT_MAX,'\n');
-                cin >> cs.name;
-            }
+            cs.name = CsNameGet();
 
-            cout << "Задайте количество цехов компрессорной станции:" << endl;
-            cin >> cs.WorkshopsNum;
-            while ((!cs.WorkshopsNum) || (cs.WorkshopsNum <= 0))
-            {
-                cout << "Задайте корректное количество цехов компрессорной станции:" << endl;
-                cin.clear();
-                cin.ignore(INT_MAX,'\n');
-                cin >> cs.WorkshopsNum;
-            }
+            cs.WorkshopsNum = CsWorkshopsAmount();
 
-            cout << "Какое количество цехов находится в работе?" << endl;
-            cin >> cs.WorkingNum;
-            if (cs.WorkingNum !=0)
-            {
-                while ((!cs.WorkingNum) || (cs.WorkingNum > cs.WorkshopsNum) || (cs.WorkingNum <0))
-                    {
-                        if (cs.WorkingNum > cs.WorkshopsNum)
-                        {
-                            cout << "Количество работающих цехов не может быть больше, чем общее количество цехов" << endl;
-                            cin.clear();
-                            cin.ignore(INT_MAX,'\n');
-                            cin >> cs.WorkingNum;
-                        }
-                        else
-                        {
-                            cout << "Введите корректное количество работающих цехов" << endl;
-                            cin.clear();
-                            cin.ignore(INT_MAX,'\n');
-                            cin >> cs.WorkingNum;
-                        }
-                    }
-            }
+            cs.WorkingNum = CsWorkingAmount(cs.WorkshopsNum);
 
-            cout << "Задайте коэффициент эффективности цеха компрессорной станции:" << endl;
-            cin >> cs.efficiency;
-            while ((!cs.efficiency) || (cs.efficiency <= 0))
-            {
-                cout << "Задайте корректное значение эффективности цеха компрессорной станции:" << endl;
-                cin.clear();
-                cin.ignore(INT_MAX,'\n');
-                cin >> cs.efficiency;
-            }
-            cs.efficiency*=(pow(1.5,cs.WorkingNum));
-
-            cout << "\n Вы успешно задали параметры компрессорной станции, возвращаем Вас в меню" << endl << endl;
+            cs.efficiency = CsEfficiency(cs.WorkshopsNum, cs.WorkingNum);
         }
-
 
         else if (MenuChoice == 3)
         {
-            if (!pipe.diameter)
-            {
-                cout << "\n Параметры трубы не добавлены\n";
-            }
-            else
-            {
-                if (pipe.repair == false)
-                {
-                    cout << "\n Параметры трубы:\n" << "\n Длина трубы: " << pipe.length << "\n Диаметр трубы: " << pipe.diameter;
-                    cout << "\n Труба находится в ремонте" << endl;
-                }
-                else
-                {
-                    cout << "\n Параметры трубы:\n" << "\n Длина трубы: " << pipe.length << "\n Диаметр трубы: " << pipe.diameter;
-                    cout << "\n Труба находится в работе" << endl;
-                }
-            }
-
-            if (!cs.WorkshopsNum)
-            {
-                cout << "\n Параметры компрессорной станции не добавлены\n" << endl;
-            }
-            else
-            {
-                cout << "\n Параметры компрессорной станции:\n" << "\n Название компрессорной станции: " << cs.name;
-                cout << "\n Количество цехов компрессорной станции: " << cs.WorkshopsNum;
-                cout << "\n Количество работающих цехов компрессорной станции: " << cs.WorkingNum;
-                cout << "\n Эффективность компрессорной станции: " <<  cs.efficiency << endl << endl;
-            }
+            cs.efficiency = CsEfficiency(cs.WorkshopsNum, cs.WorkingNum);
+            PipeCsParameters (pipe.diameter, pipe.repair, pipe.length, cs.WorkshopsNum, cs.name, cs.WorkingNum, cs.efficiency);
         }
 
         else if (MenuChoice == 4)
         {
-            if ((!pipe.repair) && (!pipe.diameter))
-            {
-                cout << "\n Для редактирования состояния трубы сначала введите параметры трубы \n" << endl;
-            }
-            else if (pipe.repair == true)
-            {
-                pipe.repair = false;
-                cout << "\n Труба отправлена в ремонт \n" << endl;
-            }
-            else
-            {
-                pipe.repair = true;
-                cout << "\n Труба поставлена на работу \n" << endl;
-            }
+            pipe.repair = PipeEdit(pipe.repair, pipe.diameter);
         }
 
         else if (MenuChoice == 5)
         {
-            if (!cs.WorkshopsNum)
-            {
-                cout << "\n Для редактирования цехов сначала введите параметры компрессорной станции\n" << endl;
-            }
-            
+            cs.WorkingNum = CsEdit(cs.WorkshopsNum, cs.WorkingNum);
         }
     }
-
     return 0;
+}
+
+float PipeLengthGet ()
+{
+    int length;
+    cout << "\nЗадайте длину трубы:" << endl;
+    cin >> length;
+    while ((!length) || (length <=0))
+        {
+            cout << "Задайте корректную длину трубы:" << endl;
+            cin.clear();
+            cin.ignore(INT_MAX,'\n');
+            cin >> length;
+        }
+    return length;
+}
+
+float PipeDiameterGet ()
+{
+    int diameter;
+    cout << "Задайте диаметр трубы:" << endl;
+    cin >> diameter;
+    while ((!diameter) || (diameter<0))
+        {
+            cout << "Задайте корректный диаметр трубы:" << endl;
+            cin.clear();
+            cin.ignore(INT_MAX,'\n');
+            cin >> diameter;
+        }
+    return diameter;
+}
+
+bool PipeRepairGet ()
+{
+    bool repair;
+    cout << "Находится ли эта труба в ремонте? 0-да, 1-нет" << endl;
+    while (!(cin>>repair))
+    {
+        cout << "Введите 0, если труба находится в ремонте; 1, если труба исправна" << endl;
+        cin.clear();
+        cin.ignore(INT_MAX,'\n');
+    }
+    cout << "\n Вы успешно задали параметры трубы, возвращаем Вас в меню" << endl << endl;
+    return repair;   
+}
+
+string CsNameGet()
+{
+    string name;
+    cout << "\nЗадайте название компрессорной станции:" << endl;
+    cin >> name;
+    while (name == "")
+    {
+        cout << "Задайте корректное название компрессорной станции:" << endl;
+        cin.clear();
+        cin.ignore(INT_MAX,'\n');
+        cin >> name;
+    }
+    return name;
+}
+
+int CsWorkshopsAmount()
+{
+    int workshops;
+    cout << "Задайте количество цехов компрессорной станции:" << endl;
+    cin >> workshops;
+    while ((!workshops) || (workshops <= 0))
+    {
+        cout << "Задайте корректное количество цехов компрессорной станции:" << endl;
+        cin.clear();
+        cin.ignore(INT_MAX,'\n');
+        cin >> workshops;
+    }
+    return workshops;
+}
+
+int CsWorkingAmount(int workshops)
+{
+    int working;
+    cout << "Какое количество цехов находится в работе?" << endl;
+    cin >> working;
+    if (working !=0)
+    {
+        while ((!working) || (working > workshops) || (working <0))
+        {
+            if (working > workshops)
+            {
+                cout << "Количество работающих цехов не может быть больше, чем общее количество цехов" << endl;
+                cin.clear();
+                cin.ignore(INT_MAX,'\n');
+                cin >> working;
+            }
+            else
+            {
+                cout << "Введите корректное количество работающих цехов" << endl;
+                cin.clear();
+                cin.ignore(INT_MAX,'\n');
+                cin >> working;
+            }
+        }
+    }
+    return working;
+}
+
+float CsEfficiency(int workshops, int working)
+{
+    float efficiency;
+    efficiency = (pow(1.3,working)/pow(1.3,workshops))*100;
+    return efficiency;
+}
+
+bool PipeEdit(bool repair,float diameter)
+{
+    if ((!repair) && (!diameter))
+    {
+        cout << "\n Для редактирования состояния трубы сначала введите параметры трубы \n" << endl;
+    }
+    else if (repair == true)
+    {
+        repair = false;
+        cout << "\n Труба отправлена в ремонт \n" << endl;
+    }
+    else
+    {
+        repair = true;
+        cout << "\n Труба поставлена на работу \n" << endl;
+    }
+    return repair;
+}
+
+int CsEdit (int workshops, int working)
+{
+    int NewOption;
+    int AddRemoveWorkshop;
+    if (!workshops)
+    {
+        cout << "\n Для редактирования цехов сначала введите параметры компрессорной станции\n" << endl;
+    }
+    else
+    {
+        cout << "\n 1. Запустить цехи \n 2. Остановить цехи\n" << endl;
+        cin >> NewOption;
+        while (((NewOption !=1) && (NewOption !=2)) || (!NewOption))
+        {
+            cout << "Введите 1, чтобы запустить цехи или 2, чтобы остановить" << endl;
+            cin >> NewOption;
+        }
+        if (NewOption == 1)
+        {
+            cout << "\nСколько еще цехов привести в работу?\n" <<endl;
+            cin >> AddRemoveWorkshop;
+            while ((!AddRemoveWorkshop) || (AddRemoveWorkshop <= 0) || ((AddRemoveWorkshop+working) > workshops))
+            {
+                if ((!AddRemoveWorkshop) || (AddRemoveWorkshop <= 0))
+                {
+                    cout << "\nВведите корректное число цехов, которые нужно подключить к работе\n" << endl;
+                    cin.clear();
+                    cin.ignore(INT_MAX,'\n');
+                    cin >> AddRemoveWorkshop;
+                }
+                else
+                {
+                    cout << "\nКоличество работающих цехов не может превышать общее количество цехов\n" << endl;
+                    cin.clear();
+                    cin.ignore(INT_MAX,'\n');
+                    cin >> AddRemoveWorkshop;
+                }
+            }
+            working+=AddRemoveWorkshop;
+        }
+        else
+        {
+            cout << "\nСколько цехов нужно остановить?" <<endl;
+            cin >> AddRemoveWorkshop;
+            while ((!AddRemoveWorkshop) || (AddRemoveWorkshop <= 0) || ((working - AddRemoveWorkshop) < 0))
+            {
+                if ((!AddRemoveWorkshop) || (AddRemoveWorkshop <= 0))
+                {
+                    cout << "\nВведите корректное число цехов, которые нужно отключить от работы" << endl;
+                    cin.clear();
+                    cin.ignore(INT_MAX,'\n');
+                    cin >> AddRemoveWorkshop;
+                }
+                else
+                {
+                    cout << "\nКоличество работающих цехов не может быть меньше нуля" << endl;
+                    cin.clear();
+                    cin.ignore(INT_MAX,'\n');
+                    cin >> AddRemoveWorkshop;
+                }
+            }    
+            working-=AddRemoveWorkshop;
+        }
+    } 
+    return working;
+}
+
+void PipeCsParameters (float diameter, bool repair,float length, int workshops, string name, int working, float efficiency)
+{
+    if (!diameter)
+    {
+        cout << "\n Параметры трубы не добавлены\n";
+    }
+    else
+    {
+        if (repair == false)
+            {
+                cout << "\n Параметры трубы:\n" << "\n Длина трубы: " << length << "\n Диаметр трубы: " << diameter;
+                cout << "\n Труба находится в ремонте" << endl;
+            }
+        else
+            {
+                cout << "\n Параметры трубы:\n" << "\n Длина трубы: " << length << "\n Диаметр трубы: " << diameter;
+                cout << "\n Труба находится в работе" << endl;
+            }
+    }
+
+    if (!workshops)
+        {
+            cout << "\n Параметры компрессорной станции не добавлены\n" << endl;
+        }
+    else
+        {
+            cout << "\n Параметры компрессорной станции:\n" << "\n Название компрессорной станции: " << name;
+            cout << "\n Количество цехов компрессорной станции: " << workshops;
+            cout << "\n Количество работающих цехов компрессорной станции: " << working;
+            cout << "\n Эффективность компрессорной станции (от 1 до 100): " <<  efficiency << endl << endl;
+        }
 }

@@ -1,5 +1,10 @@
-# Created by https://www.toptal.com/developers/gitignore/api/macos,visualstudiocode
-# Edit at https://www.toptal.com/developers/gitignore?templates=macos,visualstudiocode
+# General
+.DS_Store
+.AppleDouble
+.LSOverride
+
+# Thumbnails
+._*
 
 ### macOS ###
 # General
@@ -59,4 +64,41 @@ Temporary Items
 # Ignore code-workspaces
 *.code-workspace
 
-# End of https://www.toptal.com/developers/gitignore/api/macos,visualstudiocode
+# Prerequisites
+*.d
+
+# Compiled Object files
+*.slo
+*.lo
+*.o
+*.obj
+
+# Precompiled Headers
+*.gch
+*.pch
+
+# Compiled Dynamic libraries
+*.so
+*.dylib
+*.dll
+
+# Fortran module files
+*.mod
+*.smod
+
+# Compiled Static libraries
+*.lai
+*.la
+*.a
+*.lib
+
+# Executables
+*.exe
+*.out
+*.app
+*.dmg
+*.elf
+*.mach-o
+
+./andreev_lab1_as2105.dSYM
+.andreev_lab1_as2105
