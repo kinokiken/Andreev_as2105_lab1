@@ -57,17 +57,20 @@ int main()
         cout << "\n 1. Добавить трубу\n 2. Добавить КС\n 3. Просмотр всех объектов\n 4. Редактировать трубу\n 5. Редактировать КС\n 6. Сохранить\n 7. Загрузить\n 0. Выход\n"<<endl;
         cin >> MenuChoice;  
 
-        if (MenuChoice == 1)
+        switch(MenuChoice)
         {
+        case 1:
+        
             pipe.length = PipeLengthGet();
 
             pipe.diameter = PipeDiameterGet();
 
             pipe.repair = PipeRepairGet();
-        }
 
-        else if (MenuChoice == 2)
-        {
+            break;
+
+        case  2:
+
             cs.name = CsNameGet();
 
             cs.WorkshopsNum = CsWorkshopsAmount();
@@ -75,32 +78,46 @@ int main()
             cs.WorkingNum = CsWorkingAmount(cs.WorkshopsNum);
 
             cs.efficiency = CsEfficiency(cs.WorkshopsNum, cs.WorkingNum);
-        }
 
-        else if (MenuChoice == 3)
-        {
+            break;
+
+        case 3:
+       
             cs.efficiency = CsEfficiency(cs.WorkshopsNum, cs.WorkingNum);
             PipeCsParameters (pipe.diameter, pipe.repair, pipe.length, cs.WorkshopsNum, cs.name, cs.WorkingNum, cs.efficiency);
-        }
 
-        else if (MenuChoice == 4)
-        {
+            break;
+
+        case 4:
+
             pipe.repair = PipeEdit(pipe.repair, pipe.diameter);
-        }
 
-        else if (MenuChoice == 5)
-        {
+            break;
+
+        case 5:
+    
             cs.WorkingNum = CsEdit(cs.WorkshopsNum, cs.WorkingNum);
-        }
 
-        else if (MenuChoice == 6)
-        {
+            break;
+
+        case 6:
+        
             SaveParameters (pipe.length, pipe.diameter, pipe.repair, cs.name ,cs.WorkshopsNum, cs.WorkingNum, cs.efficiency);
-        }
 
-        else if (MenuChoice == 7)
-        {
+            break;
+
+        case 7:
+        
             LoadParameters (pipe.length, pipe.diameter, pipe.repair, cs.name, cs.WorkshopsNum, cs.WorkingNum, cs.efficiency);
+
+            break;
+
+        default:
+
+            cout << "Выберите опцию из предложенных" << endl;
+            cin.clear();
+            cin.ignore();
+            break;
         }
     }
     return 0;
@@ -211,7 +228,14 @@ int CsWorkingAmount(int workshops)
 float CsEfficiency(int workshops, int working)
 {
     float efficiency;
-    efficiency = 100*working/workshops;
+    if (workshops == 0)
+    {
+        efficiency = 0;
+    }
+    else
+    {
+        efficiency = 100*working/workshops;
+    }
     return efficiency;
 }
 
