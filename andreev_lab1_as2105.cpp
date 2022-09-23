@@ -1,4 +1,5 @@
 #include <iostream>
+#include <fstream>
 #include <string>
 #include <cmath>
 
@@ -39,17 +40,21 @@ int CsEdit (int workshops, int working);
 
 void PipeCsParameters (float diameter, bool repair,float length, int workshops, string name, int working, float efficiency);
 
+void SaveParameters (float length, float diameter, bool repair, string name, int workshops,  int working, float efficiency);
+
+void LoadParameters (float &length, float &diameter, bool &repair, string &name, int &workshops,  int &working, float &efficiency);
+
 int main()
 {
-    setlocale(LC_ALL, "rus");
+    setlocale(LC_ALL, "rus"); 
 
-    tubes pipe =  {};
+    tubes pipe =  {}; //https://purecodecpp.com/archives/1439
     CStation cs = {};
     int MenuChoice = -1;
 
     while (MenuChoice)
     {
-        cout << "\n 1. Добавить трубу \n 2. Добавить КС \n 3. Просмотр всех объектов \n 4. Редактировать трубу \n 5. Редактировать КС \n 6. Сохранить \n 7. Загрузить \n 0. Выход \n"<<endl;
+        cout << "\n 1. Добавить трубу\n 2. Добавить КС\n 3. Просмотр всех объектов\n 4. Редактировать трубу\n 5. Редактировать КС\n 6. Сохранить\n 7. Загрузить\n 0. Выход\n"<<endl;
         cin >> MenuChoice;  
 
         if (MenuChoice == 1)
@@ -87,6 +92,16 @@ int main()
         {
             cs.WorkingNum = CsEdit(cs.WorkshopsNum, cs.WorkingNum);
         }
+
+        else if (MenuChoice == 6)
+        {
+            SaveParameters (pipe.length, pipe.diameter, pipe.repair, cs.name ,cs.WorkshopsNum, cs.WorkingNum, cs.efficiency);
+        }
+
+        else if (MenuChoice == 7)
+        {
+            LoadParameters (pipe.length, pipe.diameter, pipe.repair, cs.name, cs.WorkshopsNum, cs.WorkingNum, cs.efficiency);
+        }
     }
     return 0;
 }
@@ -99,7 +114,7 @@ float PipeLengthGet ()
     while ((!length) || (length <=0))
         {
             cout << "Задайте корректную длину трубы:" << endl;
-            cin.clear();
+            cin.clear(); //https://overcoder.net/q/37792/%D0%BF%D0%BE%D1%87%D0%B5%D0%BC%D1%83-%D0%BC%D1%8B-%D0%B1%D1%83%D0%B4%D0%B5%D0%BC-%D0%B2%D1%8B%D0%B7%D1%8B%D0%B2%D0%B0%D1%82%D1%8C-cinclear-%D0%B8-cinignore-%D0%BF%D0%BE%D1%81%D0%BB%D0%B5-%D1%87%D1%82%D0%B5%D0%BD%D0%B8%D1%8F-%D0%B2%D0%B2%D0%BE%D0%B4%D0%B0
             cin.ignore(INT_MAX,'\n');
             cin >> length;
         }
@@ -196,7 +211,7 @@ int CsWorkingAmount(int workshops)
 float CsEfficiency(int workshops, int working)
 {
     float efficiency;
-    efficiency = (pow(1.3,working)/pow(1.3,workshops))*100;
+    efficiency = 100*working/workshops;
     return efficiency;
 }
 
@@ -317,4 +332,53 @@ void PipeCsParameters (float diameter, bool repair,float length, int workshops, 
             cout << "\n Количество работающих цехов компрессорной станции: " << working;
             cout << "\n Эффективность компрессорной станции (от 1 до 100): " <<  efficiency << endl << endl;
         }
+}
+
+void SaveParameters (float length, float diameter, bool repair, string name,int workshops, int working, float efficiency)
+{
+    ofstream file;
+    file.open("parameters.txt");
+    if (!file.is_open())
+    {
+        cout << "Ошибка! Не удалось открыть файл" << endl;
+    }
+    else
+    {
+        file << length << endl << diameter << endl << repair << endl;
+        file << name << endl << workshops << endl << working << endl << efficiency;
+    }
+    file.close();
+}
+
+//использование ссылочных параметров https://www.techiedelight.com/ru/return-multiple-values-functions-cpp/
+
+void LoadParameters (float &length, float &diameter, bool &repair, string &name, int &workshops,  int &working, float &efficiency)
+{
+            ifstream file;
+            string variable;
+            file.open("parameters.txt");
+            if (!file.is_open())
+            {
+                cout << "Ошибка! Не удалось открыть файл" << endl;
+            }
+            else
+            {
+                while(!file.eof())
+                {
+                    getline(file, variable);
+                    length = stof(variable);
+                    getline(file, variable);
+                    diameter = stof(variable);
+                    getline(file, variable);
+                    repair = stoi(variable);
+                    getline(file, name);
+                    getline(file, variable);
+                    workshops = stoi(variable);
+                    getline(file, variable);
+                    working = stof(variable);
+                    getline(file, variable);
+                    efficiency = stof(variable);
+                }
+            }
+            file.close();           
 }
