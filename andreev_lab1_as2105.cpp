@@ -343,6 +343,14 @@ void SaveParameters (float length, float diameter, bool repair, string name,int 
     }
     else
     {
+        if (workshops == 0)
+        {
+            efficiency = 0;
+        }   
+        else
+        {
+            efficiency = 100*working/workshops;
+        }
         file << length << endl << diameter << endl << repair << endl;
         file << name << endl << workshops << endl << working << endl << efficiency;
     }
