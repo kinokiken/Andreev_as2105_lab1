@@ -20,19 +20,13 @@ struct CStation
     float efficiency;
 };
 
-float PipeLengthGet();
+void Incorrect();
 
-float PipeDiameterGet();
+int Menu();
 
-bool PipeRepairGet();
+void PipeGet (float &length, float &diameter, bool &repair);
 
-string CsNameGet();
-
-int CsWorkshopsAmount();
-
-int CsWorkingAmount(int workshops);
-
-float CsEfficiency(int workshops, int working);
+void CsGet (string &name, int &workshops,  int &working, float &efficiency);
 
 bool PipeEdit (bool repair, float diameter);
 
@@ -50,82 +44,78 @@ int main()
 
     tubes pipe =  {}; //https://purecodecpp.com/archives/1439
     CStation cs = {};
-    int MenuChoice = -1;
 
-    while (MenuChoice)
+    while (true)
     {
-        cout << "\n 1. Добавить трубу\n 2. Добавить КС\n 3. Просмотр всех объектов\n 4. Редактировать трубу\n 5. Редактировать КС\n 6. Сохранить\n 7. Загрузить\n 0. Выход\n"<<endl;
-        cin >> MenuChoice;  
-
-        switch(MenuChoice)
+        switch(Menu())
         {
         case 1:
         
-            pipe.length = PipeLengthGet();
-
-            pipe.diameter = PipeDiameterGet();
-
-            pipe.repair = PipeRepairGet();
-
+            PipeGet (pipe.length, pipe.diameter, pipe.repair);
             break;
 
         case  2:
 
-            cs.name = CsNameGet();
-
-            cs.WorkshopsNum = CsWorkshopsAmount();
-
-            cs.WorkingNum = CsWorkingAmount(cs.WorkshopsNum);
-
-            cs.efficiency = CsEfficiency(cs.WorkshopsNum, cs.WorkingNum);
-
+            CsGet (cs.name, cs.WorkshopsNum, cs.WorkingNum, cs.efficiency);
             break;
 
         case 3:
        
-            cs.efficiency = CsEfficiency(cs.WorkshopsNum, cs.WorkingNum);
             PipeCsParameters (pipe.diameter, pipe.repair, pipe.length, cs.WorkshopsNum, cs.name, cs.WorkingNum, cs.efficiency);
-
             break;
 
         case 4:
 
             pipe.repair = PipeEdit(pipe.repair, pipe.diameter);
-
             break;
 
         case 5:
     
             cs.WorkingNum = CsEdit(cs.WorkshopsNum, cs.WorkingNum);
-
             break;
 
         case 6:
         
             SaveParameters (pipe.length, pipe.diameter, pipe.repair, cs.name ,cs.WorkshopsNum, cs.WorkingNum, cs.efficiency);
-
             break;
 
         case 7:
         
             LoadParameters (pipe.length, pipe.diameter, pipe.repair, cs.name, cs.WorkshopsNum, cs.WorkingNum, cs.efficiency);
+            break;
 
+        case 9:
+        
+            return 0;
             break;
 
         default:
 
             cout << "Выберите опцию из предложенных" << endl;
-            cin.clear();
-            cin.ignore();
             break;
         }
     }
-    return 0;
 }
 
-float PipeLengthGet ()
+int Menu()
 {
-    int length;
+    int MenuChoice;
+    cout << "\n 1. Добавить трубу\n 2. Добавить КС\n 3. Просмотр всех объектов\n 4. Редактировать трубу\n 5. Редактировать КС\n 6. Сохранить\n 7. Загрузить\n 9. Выход\n"<<endl;
+    cin >> MenuChoice;
+    while (!MenuChoice)
+    {
+        cout << "\n Введите цифру\n" << endl;
+        cin.clear();
+        cin.ignore(INT_MAX, '\n');
+        cin >> MenuChoice;
+    }
+    cin.clear();
+    cin.ignore(INT_MAX, '\n');
+    return MenuChoice;
+}
+
+void PipeGet (float &length, float &diameter, bool &repair)
+{
     cout << "\nЗадайте длину трубы:" << endl;
     cin >> length;
     while ((!length) || (length <=0))
@@ -135,12 +125,9 @@ float PipeLengthGet ()
             cin.ignore(INT_MAX,'\n');
             cin >> length;
         }
-    return length;
-}
+    cin.clear();
+    cin.ignore(INT_MAX,'\n'); 
 
-float PipeDiameterGet ()
-{
-    int diameter;
     cout << "Задайте диаметр трубы:" << endl;
     cin >> diameter;
     while ((!diameter) || (diameter<0))
@@ -150,12 +137,9 @@ float PipeDiameterGet ()
             cin.ignore(INT_MAX,'\n');
             cin >> diameter;
         }
-    return diameter;
-}
+    cin.clear();
+    cin.ignore(INT_MAX,'\n');
 
-bool PipeRepairGet ()
-{
-    bool repair;
     cout << "Находится ли эта труба в ремонте? 0-да, 1-нет" << endl;
     while (!(cin>>repair))
     {
@@ -163,28 +147,19 @@ bool PipeRepairGet ()
         cin.clear();
         cin.ignore(INT_MAX,'\n');
     }
+    cin.clear();
+    cin.ignore(INT_MAX,'\n');
     cout << "\n Вы успешно задали параметры трубы, возвращаем Вас в меню" << endl << endl;
-    return repair;   
 }
 
-string CsNameGet()
+void CsGet (string &name, int &workshops,  int &working, float &efficiency)
 {
-    string name;
+    string word;
     cout << "\nЗадайте название компрессорной станции:" << endl;
-    cin >> name;
-    while (name == "")
-    {
-        cout << "Задайте корректное название компрессорной станции:" << endl;
-        cin.clear();
-        cin.ignore(INT_MAX,'\n');
-        cin >> name;
-    }
-    return name;
-}
+    cin >> word;
+    getline(cin, name);
+    name = word + name;
 
-int CsWorkshopsAmount()
-{
-    int workshops;
     cout << "Задайте количество цехов компрессорной станции:" << endl;
     cin >> workshops;
     while ((!workshops) || (workshops <= 0))
@@ -194,40 +169,31 @@ int CsWorkshopsAmount()
         cin.ignore(INT_MAX,'\n');
         cin >> workshops;
     }
-    return workshops;
-}
+    cin.clear();
+    cin.ignore(INT_MAX,'\n');
 
-int CsWorkingAmount(int workshops)
-{
-    int working;
     cout << "Какое количество цехов находится в работе?" << endl;
     cin >> working;
-    if (working !=0)
+    while ((!working) || (working > workshops) || (working <0))
     {
-        while ((!working) || (working > workshops) || (working <0))
+        if (working > workshops)
         {
-            if (working > workshops)
-            {
-                cout << "Количество работающих цехов не может быть больше, чем общее количество цехов" << endl;
-                cin.clear();
-                cin.ignore(INT_MAX,'\n');
-                cin >> working;
-            }
-            else
-            {
-                cout << "Введите корректное количество работающих цехов" << endl;
-                cin.clear();
-                cin.ignore(INT_MAX,'\n');
-                cin >> working;
-            }
+            cout << "Количество работающих цехов не может быть больше, чем общее количество цехов" << endl;
+            cin.clear();
+            cin.ignore(INT_MAX,'\n');
+            cin >> working;
+        }
+        else
+        {
+            cout << "Введите корректное количество работающих цехов" << endl;
+            cin.clear();
+            cin.ignore(INT_MAX,'\n');
+            cin >> working;
         }
     }
-    return working;
-}
+    cin.clear();
+    cin.ignore(INT_MAX,'\n');
 
-float CsEfficiency(int workshops, int working)
-{
-    float efficiency;
     if (workshops == 0)
     {
         efficiency = 0;
@@ -236,7 +202,6 @@ float CsEfficiency(int workshops, int working)
     {
         efficiency = 100*working/workshops;
     }
-    return efficiency;
 }
 
 bool PipeEdit(bool repair,float diameter)
@@ -322,6 +287,8 @@ int CsEdit (int workshops, int working)
             working-=AddRemoveWorkshop;
         }
     } 
+    cin.clear();
+    cin.ignore(INT_MAX,'\n');
     return working;
 }
 
@@ -354,6 +321,14 @@ void PipeCsParameters (float diameter, bool repair,float length, int workshops, 
             cout << "\n Параметры компрессорной станции:\n" << "\n Название компрессорной станции: " << name;
             cout << "\n Количество цехов компрессорной станции: " << workshops;
             cout << "\n Количество работающих цехов компрессорной станции: " << working;
+            if (workshops == 0)
+            {
+                efficiency = 0;
+            }
+            else
+            {
+                efficiency = 100*working/workshops;
+            }
             cout << "\n Эффективность компрессорной станции (от 1 до 100): " <<  efficiency << endl << endl;
         }
 }

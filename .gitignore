@@ -504,3 +504,5 @@ FodyWeavers.xsd
 .DS_Store
 .DS_Store
 andreev_lab1_as2105
+*.json
+andreev_lab1_as2105.dSYM/Contents/Resources/DWARF/andreev_lab1_as2105
