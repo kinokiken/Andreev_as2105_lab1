@@ -45,7 +45,7 @@ void PipeCsParameters (unordered_map <int, Pipes>& p_g, unordered_map <int, CSta
 
 void SaveParameters (unordered_map <int, Pipes>& p_g, unordered_map <int, CStation>& cs_g);
 
-void LoadParameters (Pipes& pipe, CStation& CS);
+void LoadParameters (ifstream& file, unordered_map <int, Pipes>& p_g, unordered_map <int, CStation>& cs_g);
 
 int main()
 {
@@ -80,18 +80,25 @@ int main()
         case 6:
             SaveParameters (pipes_map, cs_map);
             break;
-        case 7:
-        
-        //     LoadParameters (pipe.length, pipe.diameter, pipe.repair, cs.name, cs.WorkshopsNum, cs.WorkingNum, cs.efficiency);
-        //     break;
-        
-        case 0:{
-        
+        case 7:{
+            ifstream file;
+            string filename;
+            cout << "Из какого файла брать данные?" << endl;
+            cin >> filename;
+            file.open(filename + ".txt");
+            if (!file.is_open())
+            {
+             cout << "Ошибка! Не удалось открыть файл" << endl;
+            }
+             else
+            {
+            LoadParameters (file, pipes_map, cs_map);
+            }
+            break;}
+        case 0:{      
             return 0;
             break;}
-
         default:
-
             cout << "Выберите опцию из предложенных" << endl;
             break;
         }
@@ -368,7 +375,7 @@ void SaveParameters (unordered_map <int, Pipes>& p_g, unordered_map <int, CStati
 {
     string filename;
     ofstream file;
-    cout << "Как вы хотите назвать файл сохранения?";
+    cout << "Как вы хотите назвать файл сохранения?" << endl;
     cin >> filename;
     file.open(filename + ".txt");
     if (!file.is_open())
@@ -377,9 +384,10 @@ void SaveParameters (unordered_map <int, Pipes>& p_g, unordered_map <int, CStati
     }
     else
     {
+        file << p_g.size() << endl << cs_g.size() << endl;
         for (auto pipe: p_g)
         {
-        file << pipe.first << pipe.second.name << endl << pipe.second.length << endl << pipe.second.diameter << endl << pipe.second.repair << endl;
+        file << pipe.first << endl << pipe.second.pname << endl << pipe.second.length << endl << pipe.second.diameter << endl << pipe.second.repair << endl;
         }
         for (auto cs: cs_g)
         {
@@ -389,35 +397,31 @@ void SaveParameters (unordered_map <int, Pipes>& p_g, unordered_map <int, CStati
     file.close();
 }
 
-//использование ссылочных параметров https://www.techiedelight.com/ru/return-multiple-values-functions-cpp/
-
-void LoadParameters (Pipes& pipe, CStation& CS)
+void LoadParameters (ifstream& file,unordered_map <int, Pipes>& p_g, unordered_map <int, CStation>& cs_g)
 {
-            ifstream file;
-            string variable;
-            file.open("parameters.txt");
-            if (!file.is_open())
-            {
-                cout << "Ошибка! Не удалось открыть файл" << endl;
-            }
-            else
-            {
-                while(!file.eof())
-                {
-                    getline(file, variable);
-                    pipe.length = stof(variable);
-                    getline(file, variable);
-                    pipe.diameter = stof(variable);
-                    getline(file, variable);
-                    pipe.repair = stoi(variable);
-                    getline(file, CS.name);
-                    getline(file, variable);
-                    CS.WorkshopsNum = stoi(variable);
-                    getline(file, variable);
-                    CS.WorkingNum = stof(variable);
-                    getline(file, variable);
-                    CS.efficiency = stof(variable);
-                }
-            }
-            file.close();           
+    int i;
+    int pipes_amount;
+    int cs_amount;
+    Pipes p;
+    CStation cs;
+    file >> pipes_amount;
+    file >> cs_amount;
+    for (i = 0; i < pipes_amount; ++i)
+    {
+        file >> p.PipeIndx;
+        file.ignore();
+        getline(file, p.pname);
+        file >> p.length >> p.diameter >> p.repair;
+        p_g.insert({p.PipeIndx, p});
+    }
+    for (i = 0; i < cs_amount; ++i)
+    {
+        file >> cs.CsIndx;
+        file.ignore();
+        getline(file, cs.name);
+        file >> cs.WorkshopsNum >> cs.WorkingNum >> cs.efficiency;   
+        cs_g.insert({cs.CsIndx, cs});            
+    }
+    file.close();
+    cout << "\nДанные успешно извлечены!" << endl;          
 }
