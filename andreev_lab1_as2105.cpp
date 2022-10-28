@@ -77,10 +77,10 @@ int main()
         case 5:
             CsEdit(cs_map);
             break;
-        // case 6:
-        //     SaveParameters (pipes_map, cs_map);
-        //     break;
-        // case 7:
+        case 6:
+            SaveParameters (pipes_map, cs_map);
+            break;
+        case 7:
         
         //     LoadParameters (pipe.length, pipe.diameter, pipe.repair, cs.name, cs.WorkshopsNum, cs.WorkingNum, cs.efficiency);
         //     break;
@@ -366,24 +366,25 @@ void PipeCsParameters (unordered_map <int, Pipes>& p_g, unordered_map <int, CSta
 
 void SaveParameters (unordered_map <int, Pipes>& p_g, unordered_map <int, CStation>& cs_g)
 {
+    string filename;
     ofstream file;
-    file.open("parameters.txt");
+    cout << "Как вы хотите назвать файл сохранения?";
+    cin >> filename;
+    file.open(filename + ".txt");
     if (!file.is_open())
     {
         cout << "Ошибка! Не удалось открыть файл" << endl;
     }
     else
     {
-        if (CS.WorkshopsNum == 0)
+        for (auto pipe: p_g)
         {
-            CS.efficiency = 0;
-        }   
-        else
-        {
-            CS.efficiency = 100*CS.WorkingNum/CS.WorkshopsNum;
+        file << pipe.first << pipe.second.name << endl << pipe.second.length << endl << pipe.second.diameter << endl << pipe.second.repair << endl;
         }
-        file << pipe.length << endl << pipe.diameter << endl << pipe.repair << endl;
-        file << CS.name << endl << CS.WorkshopsNum << endl << CS.WorkingNum << endl << CS.efficiency;
+        for (auto cs: cs_g)
+        {
+        file << cs.first << endl << cs.second.name << endl << cs.second.WorkingNum << endl << cs.second.WorkshopsNum << endl << cs.second.efficiency << endl;    
+        }
     }
     file.close();
 }
