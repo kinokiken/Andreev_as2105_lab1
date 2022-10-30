@@ -18,6 +18,7 @@ public:
     bool repair = 0;
 
     friend istream& operator >> (istream& is, Pipes& pipe);
+    friend ostream& operator << (ostream& os, Pipes& pipe);
     friend ofstream& operator << (ofstream& file, Pipes& pipe);
     friend ifstream& operator >> (ifstream& file, Pipes& pipe);
 };
@@ -32,6 +33,7 @@ public:
     int efficiency = 0;
 
     friend istream& operator >> (istream& is, CStation& cs);
+    friend ostream& operator << (ostream& os, CStation& cs);
     friend ofstream& operator << (ofstream& file, CStation& cs);
     friend ifstream& operator >> (ifstream& file, CStation& cs);
 };
@@ -103,6 +105,9 @@ int main()
         case 10:{
             PBatchEdit(pipes_map);
             break;}
+        case 11:{
+            CsBatchEdit(cs_map);
+            break;}
         case 0:{      
             return 0;
             break;}
@@ -117,7 +122,7 @@ int Menu()
 {
     int MenuChoice;
     cout << "\n 1. Добавить трубу\n 2. Добавить КС\n 3. Просмотр всех объектов\n 4. Редактировать трубу\n 5. Редактировать КС " << endl;
-    cout << " 6. Сохранить\n 7. Загрузить\n 8. Фильтр труб\n 9. Фильтр КС\n 10. Пакетное редактирование труб\n 0. Выход\n"<<endl;
+    cout << " 6. Сохранить\n 7. Загрузить\n 8. Фильтр труб\n 9. Фильтр КС\n 10. Пакетное редактирование труб\n 11. Пакетное редактирование КС\n 0. Выход\n"<<endl;
     while (((cin >> MenuChoice).fail()) || (cin.peek() != '\n'))
     {
         cout << "\n Введите цифру для начала работы\n" << endl;
@@ -249,8 +254,8 @@ void PipeEdit(unordered_map <int, Pipes>& pm)
     }
     else
     {
-        cout << "\nКакую операцию вы хотите совершить? \n0) Удаление трубы \n1) Редактирование состояния трубы\n" << endl;
-        if (GetLimValue(0,1)==0)
+        cout << "\nКакую операцию вы хотите совершить? \n1) Удаление трубы \n2) Редактирование состояния трубы\n" << endl;
+        if (GetLimValue(1,2)==1)
         {
             cout << "\nКакую трубу удалить?" << endl;
             id = IdCheck(pm);
@@ -279,6 +284,7 @@ void PipeEdit(unordered_map <int, Pipes>& pm)
 void EditWorkshops(int id, unordered_map <int, CStation>& csm)
 {
     int AddRemoveWorkshop;
+    cout << "\nКС: " << id << " | Всего цехов: " << csm.at(id).WorkshopsNum << " | Цехов в работе: " << csm.at(id).WorkingNum << endl;
     cout << "\n 1. Запустить цехи \n 2. Остановить цехи\n" << endl;
     if (GetLimValue(1,2) == 1)
     {
@@ -327,8 +333,8 @@ void CsEdit (unordered_map <int, CStation>& csm)
     }
     else
     {
-        cout << "\nКакую операцию вы хотите совершить? \n0) Удаление КС \n1) Редактирование КС\n" << endl;
-        if (GetLimValue(0,1) == 0)
+        cout << "\nКакую операцию вы хотите совершить? \n1) Удаление КС \n2) Редактирование КС\n" << endl;
+        if (GetLimValue(1,2) == 1)
         {
             cout << "\nКакую КС удалить?" << endl;
             id = IdCheck(csm);
@@ -506,9 +512,16 @@ unordered_set <int> PipeFilter (unordered_map <int, Pipes>& pm)
 			}
 		}       
     }
-    for (auto id: PIndx)
+    if (PIndx.size() != 0)
     {
-        cout << pm[id];
+        for (auto id: PIndx)
+        {
+            cout << pm[id];
+        }
+    }
+    else
+    {
+        cout << "Не найдено ни одной трубы по данному фильтру" << endl;
     }
     return PIndx;
 }
@@ -525,7 +538,7 @@ unordered_set <int> CsFilter (unordered_map <int, CStation>& csm)
     if (choice == 1)
     {
         string findname;
-        cout << "\nПо какому названию отфильтровать трубы?\n" << endl;
+        cout << "\nПо какому названию отфильтровать КС?\n" << endl;
         cin >> findname;
 		for (auto& cs : csm) 
         {
@@ -576,9 +589,16 @@ unordered_set <int> CsFilter (unordered_map <int, CStation>& csm)
             } 
         }     
     }
-    for (auto id: CIndx)
+    if (CIndx.size() != 0)
     {
-        cout << csm[id];
+        for (auto id: CIndx)
+        {
+            cout << csm[id];
+        }
+    }
+    else
+    {
+        cout << "Не найдено ни одной КС по данному фильтру" << endl;
     }   
     return CIndx;
 }
@@ -607,19 +627,69 @@ void PBatchEdit (unordered_map <int, Pipes>& pm)
         cout << "\nСколько труб в сумме вы хотите отредактировать\n" << endl;
         int amount;
         amount = GetLimValue(0, (int)pm.size());
-        cout << "Поочередно вписывайте номера труб" << endl;
-        int num;
-        for (int i = 0; i < amount; i++)
+        if (amount != 0)
         {
-            num = IdCheck(pm);
-            set.insert(num);
+            cout << "Поочередно вписывайте номера труб" << endl;
+            int num;
+            for (int i = 0; i < amount; i++)
+            {
+                num = IdCheck(pm);
+                set.insert(num);
+            }
+            cout << "\n 1) Поставить все на работу\n 0) Отправить все на ремонт" << endl;
+            rep = GetLimValue(0, 1);
+            for (auto& i : set)
+            {
+                pm[i].repair = rep;
+            }
         }
-        cout << "\n 1) Поставить все на работу\n 0) Отправить все на ремонт" << endl;
-        rep = GetLimValue(0, 1);
-        for (auto& i : set)
+        else
         {
-        pm[i].repair = rep;
+            cout << "Передумали? Возвращаем в меню" << endl;
         }
     }
 }
 
+void CsBatchEdit (unordered_map <int, CStation>& csm)
+{
+    int choice;
+    bool rep;
+    unordered_set <int> set;
+    cout << "\nКакие КС нужно отредактировать?" << endl;
+    cout << "1) Выбрать по фильтру" << endl;
+    cout << "2) Выбрать вручную\n" << endl;
+    choice = GetLimValue(1,2);
+    if (choice == 1)
+    {
+        set = CsFilter(csm);
+        for (auto& i: set)
+        {
+            EditWorkshops(i, csm);
+        }
+    }
+    else
+    {
+        cout << "\nСколько КС в сумме вы хотите отредактировать\n" << endl;
+        int amount;
+        amount = GetLimValue(0, (int)csm.size());
+        if (amount != 0)
+            {
+            cout << "Поочередно вписывайте номера КС" << endl;
+            int num;
+            for (int i = 0; i < amount; i++)
+            {
+                num = IdCheck(csm);
+                set.insert(num);
+            }
+            cout << "\n КС выбраны, переходим к редактированию \n" << endl;
+            for (auto& i : set)
+            {
+                EditWorkshops(i, csm);
+            }
+        }
+        else
+        {
+            cout << "Передумали? Возвращаем в меню" << endl;
+        }
+    }  
+}
