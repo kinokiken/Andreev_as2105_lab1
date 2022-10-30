@@ -31,19 +31,17 @@ int Menu();
 
 bool choice();
 
-int PipeIdCheck(unordered_map <int, Pipes>& pm);
+istream& operator >> (istream& is, Pipes& pipe);
 
-void PipeGet (Pipes& pipe);
-
-void CsGet (CStation& CS);
+istream& operator >> (istream& is, CStation& cs);
 
 void PipeEdit (unordered_map <int, Pipes>& pm);
 
 void CsEdit (unordered_map <int, CStation>& csm);
 
-void ShowPipeParameters(unordered_map <int, Pipes>& pm);
+ostream& operator << (ostream& os, unordered_map <int, Pipes>& pm);
 
-void ShowCsParameters(unordered_map <int, CStation>& csm);
+ostream& operator << (ostream& os, unordered_map <int, CStation>& csm);
 
 void SaveParameters (unordered_map <int, Pipes>& pm, unordered_map <int, CStation>& csm);
 
@@ -52,6 +50,8 @@ void LoadParameters (unordered_map <int, Pipes>& pm, unordered_map <int, CStatio
 void PipeFilter (unordered_map <int, Pipes>& pm);
 
 void CsFilter (unordered_map <int, CStation>& csm);
+
+void PBatchEdit (unordered_map <int, Pipes>& pm);
 
 int main()
 {
@@ -66,17 +66,17 @@ int main()
         {
         case 1:{
             Pipes P;
-            PipeGet (P);
+            cin >> P;
             pipes_map.insert({P.PipeIndx, P});
             break;}
         case  2:{
             CStation CS;
-            CsGet (CS);
+            cin >> CS;
             cs_map.insert({CS.CsIndx, CS});
             break;}
         case 3:{
-            ShowPipeParameters(pipes_map);
-            ShowCsParameters(cs_map);
+            cout << pipes_map;
+            cout << cs_map;
             break;}
         case 4:
             PipeEdit(pipes_map);
@@ -132,7 +132,14 @@ bool choice()
     return choice;
 }
 
-int PipeIdCheck(unordered_map <int, Pipes>& pm)
+void CinClear()
+{
+    cout << "Задайте корректное значение:" << endl;
+    cin.clear(); //https://overcoder.net/q/37792/%D0%BF%D0%BE%D1%87%D0%B5%D0%BC%D1%83-%D0%BC%D1%8B-%D0%B1%D1%83%D0%B4%D0%B5%D0%BC-%D0%B2%D1%8B%D0%B7%D1%8B%D0%B2%D0%B0%D1%82%D1%8C-cinclear-%D0%B8-cinignore-%D0%BF%D0%BE%D1%81%D0%BB%D0%B5-%D1%87%D1%82%D0%B5%D0%BD%D0%B8%D1%8F-%D0%B2%D0%B2%D0%BE%D0%B4%D0%B0
+    cin.ignore(INT_MAX,'\n');    
+}
+
+int IdCheck(unordered_map <int, Pipes>& pm)
 {
     int id;
     while (((cin >> id).fail()) || (cin.peek() != '\n') || (id <= 0) || (!pm.contains(id)))
@@ -144,7 +151,7 @@ int PipeIdCheck(unordered_map <int, Pipes>& pm)
     return id;
 }
 
-int CsIdCheck(unordered_map <int, CStation>& csm)
+int IdCheck(unordered_map <int, CStation>& csm)
 {
     int id;
     while (((cin >> id).fail()) || (cin.peek() != '\n') || (id <= 0) || (!csm.contains(id)))
@@ -156,14 +163,17 @@ int CsIdCheck(unordered_map <int, CStation>& csm)
     return id;
 }
 
-void CinClear()
+float GetValue()
 {
-    cout << "Задайте корректное значение:" << endl;
-    cin.clear(); //https://overcoder.net/q/37792/%D0%BF%D0%BE%D1%87%D0%B5%D0%BC%D1%83-%D0%BC%D1%8B-%D0%B1%D1%83%D0%B4%D0%B5%D0%BC-%D0%B2%D1%8B%D0%B7%D1%8B%D0%B2%D0%B0%D1%82%D1%8C-cinclear-%D0%B8-cinignore-%D0%BF%D0%BE%D1%81%D0%BB%D0%B5-%D1%87%D1%82%D0%B5%D0%BD%D0%B8%D1%8F-%D0%B2%D0%B2%D0%BE%D0%B4%D0%B0
-    cin.ignore(INT_MAX,'\n');    
+    float value;
+    while (((cin >> value).fail()) || (cin.peek() != '\n') || (value <=0))
+        {
+            CinClear();
+        } 
+    return value;   
 }
 
-void PipeGet (Pipes& pipe)
+istream& operator >> (istream& is, Pipes& pipe)
 {
     pipe.PipeIndx = ++PipeIndx;
     cout << "\nЗадайте название данной трубы:" << endl;
@@ -171,18 +181,13 @@ void PipeGet (Pipes& pipe)
     cin.ignore(INT_MAX, '\n');
     getline(cin, pipe.pname);
     cout << "Задайте длину трубы:" << endl;
-    while (((cin >> pipe.length).fail()) || (cin.peek() != '\n') || (pipe.length <=0))
-        {
-            CinClear();
-        }
+    pipe.length = GetValue();
     cout << "Задайте диаметр трубы:" << endl;
-    while (((cin >> pipe.diameter).fail()) || (cin.peek() != '\n') || (pipe.diameter<=0))
-        {
-            CinClear();
-        }
+    pipe.diameter = GetValue();
     cout << "Находится ли эта труба в ремонте? 0-да, 1-нет" << endl;
     pipe.repair = choice();
     cout << "\n Вы успешно задали параметры трубы, возвращаем Вас в меню" << endl << endl;
+    return is;
 }
 
 int GetEfficiency()
@@ -195,7 +200,7 @@ int GetEfficiency()
     return efficiency;   
 }
 
-void CsGet (CStation& cs)
+istream& operator >> (istream& is, CStation& cs)
 {
     cs.CsIndx = ++CsIndx;
     cout << "\nЗадайте название компрессорной станции:" << endl;
@@ -203,10 +208,10 @@ void CsGet (CStation& cs)
     cin.ignore(INT_MAX, '\n');
     getline(cin, cs.name);
     cout << "Задайте количество цехов компрессорной станции:" << endl;
-    while (((cin >> cs.WorkshopsNum).fail()) || (cin.peek() != '\n') || (cs.WorkshopsNum <= 0))
-    {
-        CinClear();
-    }
+    while (((cin >> cs.WorkshopsNum).fail()) || (cin.peek() != '\n') || (cs.WorkshopsNum <=0))
+        {
+            CinClear();
+        }  
     cout << "Какое количество цехов находится в работе?" << endl;
     while (((cin >> cs.WorkingNum).fail()) || (cin.peek() != '\n') || (cs.WorkingNum > cs.WorkshopsNum) || (cs.WorkingNum <0))
     {
@@ -223,6 +228,7 @@ void CsGet (CStation& cs)
     }
     cout << "Какова эффективность данной КС по стобалльной шкале?" << endl;
     cs.efficiency = GetEfficiency();
+    return is;
 }
 
 void PipeEdit(unordered_map <int, Pipes>& pm)
@@ -238,14 +244,14 @@ void PipeEdit(unordered_map <int, Pipes>& pm)
         if (choice()==0)
         {
             cout << "\nКакую трубу удалить?" << endl;
-            id = PipeIdCheck(pm);
+            id = IdCheck(pm);
             auto pipe = pm.find(id);
             pm.erase(pipe);
         }
         else
         {
             cout << "\nКакую трубу отправить в ремонт или вернуть на работу?" << endl;
-            id = PipeIdCheck(pm);
+            id = IdCheck(pm);
             auto pipe = pm.find(id);
             if (pm.at(id).repair == true)
             {
@@ -275,14 +281,14 @@ void CsEdit (unordered_map <int, CStation>& csm)
         if (choice() == 0)
         {
             cout << "\nКакую КС удалить?" << endl;
-            id = CsIdCheck(csm);
+            id = IdCheck(csm);
             auto cs = csm.find(id);
             csm.erase(cs);
         }
         else
         {
             cout << "\nКакую КС отредактировать?" << endl;
-            id = CsIdCheck(csm);
+            id = IdCheck(csm);
             auto cs = csm.find(id);
             cout << "\n 0. Запустить цехи \n 1. Остановить цехи\n" << endl;
             if (choice() == 0)
@@ -325,7 +331,7 @@ void CsEdit (unordered_map <int, CStation>& csm)
     }
 }
 
-void ShowPipeParameters (unordered_map <int, Pipes>& pm)
+ostream& operator << (ostream& os, unordered_map <int, Pipes>& pm)
 {
     if (pm.size() !=0) 
     {
@@ -350,9 +356,10 @@ void ShowPipeParameters (unordered_map <int, Pipes>& pm)
     {
         cout << "\n Нет ни одной трубы" << endl;
     }    
+    return os;
 }
 
-void ShowCsParameters(unordered_map <int, CStation>& csm)
+ostream& operator << (ostream& os, unordered_map <int, CStation>& csm)
 {
     if (csm.size() !=0)
     {
@@ -369,6 +376,7 @@ void ShowCsParameters(unordered_map <int, CStation>& csm)
     {
         cout << "\n Нет ни одной КС" << endl;
     }    
+    return os;
 }
 
 void SaveParameters (unordered_map <int, Pipes>& pm, unordered_map <int, CStation>& csm)
@@ -485,7 +493,7 @@ void PipeFilter (unordered_map <int, Pipes>& pm)
 			}
 		}       
     }
-    ShowPipeParameters(Chosen);
+    cout << Chosen;
 }
 
 void CsFilter (unordered_map <int, CStation>& csm)
@@ -557,5 +565,5 @@ void CsFilter (unordered_map <int, CStation>& csm)
             } 
         }     
     }
-    ShowCsParameters(Chosen);
+    cout << Chosen;
 }
