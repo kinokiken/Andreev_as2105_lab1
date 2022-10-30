@@ -2,6 +2,7 @@
 #include <fstream>
 #include <string>
 #include <unordered_map>
+#include <unordered_set>
 int PipeIndx = 0;
 int CsIndx = 0;
 
@@ -15,6 +16,10 @@ public:
     float length = 0;
     float diameter = 0;
     bool repair = 0;
+
+    friend istream& operator >> (istream& is, Pipes& pipe);
+    friend ofstream& operator << (ofstream& file, Pipes& pipe);
+    friend ifstream& operator >> (ifstream& file, Pipes& pipe);
 };
 
 class CStation 
@@ -25,33 +30,33 @@ public:
     int WorkshopsNum = 0;
     int WorkingNum = 0;
     int efficiency = 0;
+
+    friend istream& operator >> (istream& is, CStation& cs);
+    friend ofstream& operator << (ofstream& file, CStation& cs);
+    friend ifstream& operator >> (ifstream& file, CStation& cs);
 };
 
 int Menu();
 
-bool choice();
+string RepairMsg(bool repair);
 
-istream& operator >> (istream& is, Pipes& pipe);
-
-istream& operator >> (istream& is, CStation& cs);
+void ShowParameters (unordered_map <int, Pipes>& pm, unordered_map <int, CStation>& csm);
 
 void PipeEdit (unordered_map <int, Pipes>& pm);
 
 void CsEdit (unordered_map <int, CStation>& csm);
 
-ostream& operator << (ostream& os, unordered_map <int, Pipes>& pm);
-
-ostream& operator << (ostream& os, unordered_map <int, CStation>& csm);
-
 void SaveParameters (unordered_map <int, Pipes>& pm, unordered_map <int, CStation>& csm);
 
 void LoadParameters (unordered_map <int, Pipes>& pm, unordered_map <int, CStation>& csm);
 
-void PipeFilter (unordered_map <int, Pipes>& pm);
+unordered_set <int> PipeFilter (unordered_map <int, Pipes>& pm);
 
-void CsFilter (unordered_map <int, CStation>& csm);
+unordered_set <int> CsFilter (unordered_map <int, CStation>& csm);
 
 void PBatchEdit (unordered_map <int, Pipes>& pm);
+
+void CsBatchEdit (unordered_map <int, CStation>& csm);
 
 int main()
 {
@@ -75,8 +80,7 @@ int main()
             cs_map.insert({CS.CsIndx, CS});
             break;}
         case 3:{
-            cout << pipes_map;
-            cout << cs_map;
+            ShowParameters (pipes_map, cs_map);
             break;}
         case 4:
             PipeEdit(pipes_map);
@@ -96,6 +100,9 @@ int main()
         case 9:{
             CsFilter(cs_map);
             break;}
+        case 10:{
+            PBatchEdit(pipes_map);
+            break;}
         case 0:{      
             return 0;
             break;}
@@ -110,7 +117,7 @@ int Menu()
 {
     int MenuChoice;
     cout << "\n 1. Добавить трубу\n 2. Добавить КС\n 3. Просмотр всех объектов\n 4. Редактировать трубу\n 5. Редактировать КС " << endl;
-    cout << " 6. Сохранить\n 7. Загрузить\n 8. Фильтр труб\n 9. Фильтр КС\n 0. Выход\n"<<endl;
+    cout << " 6. Сохранить\n 7. Загрузить\n 8. Фильтр труб\n 9. Фильтр КС\n 10. Пакетное редактирование труб\n 0. Выход\n"<<endl;
     while (((cin >> MenuChoice).fail()) || (cin.peek() != '\n'))
     {
         cout << "\n Введите цифру для начала работы\n" << endl;
@@ -120,16 +127,16 @@ int Menu()
     return MenuChoice;
 }
 
-bool choice()
+string RepairMsg(bool repair)
 {
-    bool choice;
-    while (((cin >> choice).fail()) || (cin.peek() != '\n') || ((choice !=1) && (choice !=0)))
+    if (repair == 0)
     {
-        cout << "Введите 0 или 1" << endl;
-        cin.clear();
-        cin.ignore(INT_MAX,'\n');
+        return ("Труба находится в ремонте");
     }
-    return choice;
+    else
+    {
+        return ("Труба находится в работе");
+    }
 }
 
 void CinClear()
@@ -139,38 +146,37 @@ void CinClear()
     cin.ignore(INT_MAX,'\n');    
 }
 
-int IdCheck(unordered_map <int, Pipes>& pm)
+template <typename T>
+int IdCheck(unordered_map<int, T> umap)
 {
     int id;
-    while (((cin >> id).fail()) || (cin.peek() != '\n') || (id <= 0) || (!pm.contains(id)))
+    while (((cin >> id).fail()) || (cin.peek() != '\n') || (id <= 0) || (!umap.contains(id)))
     {
-        cout << "Такой трубы нет, введите другой индекс" << endl;
+        cout << "Такого объекта нет, введите другой индекс" << endl;
         cin.clear();
         cin.ignore(INT_MAX, '\n');
     }
     return id;
 }
 
-int IdCheck(unordered_map <int, CStation>& csm)
+template <typename T>
+void GetValue(T& a)
 {
-    int id;
-    while (((cin >> id).fail()) || (cin.peek() != '\n') || (id <= 0) || (!csm.contains(id)))
-    {
-        cout << "Такой КС нет, введите другой индекс" << endl;
-        cin.clear();
-        cin.ignore(INT_MAX, '\n');
-    }
-    return id;
-}
-
-float GetValue()
-{
-    float value;
-    while (((cin >> value).fail()) || (cin.peek() != '\n') || (value <=0))
+    while (((cin >> a).fail()) || (cin.peek() != '\n') || (a <=0))
         {
             CinClear();
-        } 
-    return value;   
+        }    
+}
+
+template <typename T>
+T GetLimValue(T min, T max) 
+{
+	T value;
+	while (((cin >> value).fail()) || (cin.peek() != '\n') || (value < min) || (value > max))
+    {
+	    CinClear();
+	}
+    return value;
 }
 
 istream& operator >> (istream& is, Pipes& pipe)
@@ -181,23 +187,20 @@ istream& operator >> (istream& is, Pipes& pipe)
     cin.ignore(INT_MAX, '\n');
     getline(cin, pipe.pname);
     cout << "Задайте длину трубы:" << endl;
-    pipe.length = GetValue();
+    GetValue(pipe.length);
     cout << "Задайте диаметр трубы:" << endl;
-    pipe.diameter = GetValue();
+    GetValue(pipe.diameter);
     cout << "Находится ли эта труба в ремонте? 0-да, 1-нет" << endl;
-    pipe.repair = choice();
+    pipe.repair = GetLimValue(0,1);
     cout << "\n Вы успешно задали параметры трубы, возвращаем Вас в меню" << endl << endl;
     return is;
 }
 
-int GetEfficiency()
+ostream& operator << (ostream& os, Pipes& pipe)
 {
-    int efficiency;
-    while (((cin >> efficiency).fail()) || (cin.peek() != '\n') || (efficiency > 100) || (efficiency < 0))
-    {
-        CinClear();
-    } 
-    return efficiency;   
+    os << endl << pipe.PipeIndx << ") Параметры трубы с названием " << pipe.pname << ":" << "\n   Длина трубы: " << pipe.length 
+    << "\n   Диаметр трубы: " << pipe.diameter << endl << "   " << RepairMsg(pipe.repair) << endl;
+    return os;
 }
 
 istream& operator >> (istream& is, CStation& cs)
@@ -208,10 +211,7 @@ istream& operator >> (istream& is, CStation& cs)
     cin.ignore(INT_MAX, '\n');
     getline(cin, cs.name);
     cout << "Задайте количество цехов компрессорной станции:" << endl;
-    while (((cin >> cs.WorkshopsNum).fail()) || (cin.peek() != '\n') || (cs.WorkshopsNum <=0))
-        {
-            CinClear();
-        }  
+    GetValue(cs.WorkshopsNum);
     cout << "Какое количество цехов находится в работе?" << endl;
     while (((cin >> cs.WorkingNum).fail()) || (cin.peek() != '\n') || (cs.WorkingNum > cs.WorkshopsNum) || (cs.WorkingNum <0))
     {
@@ -227,8 +227,17 @@ istream& operator >> (istream& is, CStation& cs)
         }
     }
     cout << "Какова эффективность данной КС по стобалльной шкале?" << endl;
-    cs.efficiency = GetEfficiency();
+    cs.efficiency = GetLimValue(0,100);
     return is;
+}
+
+ostream& operator << (ostream& os, CStation& cs)
+{
+    os << endl << cs.CsIndx << ") Название компрессорной станции: " << cs.name
+    << "\n   Количество цехов компрессорной станции: " << cs.WorkshopsNum
+    << "\n   Количество работающих цехов компрессорной станции: " << cs.WorkingNum
+    << "\n   Эффективность компрессорной станции (от 1 до 100): " <<  cs.efficiency << endl << endl;
+    return os;
 }
 
 void PipeEdit(unordered_map <int, Pipes>& pm)
@@ -241,7 +250,7 @@ void PipeEdit(unordered_map <int, Pipes>& pm)
     else
     {
         cout << "\nКакую операцию вы хотите совершить? \n0) Удаление трубы \n1) Редактирование состояния трубы\n" << endl;
-        if (choice()==0)
+        if (GetLimValue(0,1)==0)
         {
             cout << "\nКакую трубу удалить?" << endl;
             id = IdCheck(pm);
@@ -267,9 +276,50 @@ void PipeEdit(unordered_map <int, Pipes>& pm)
     }
 }
 
-void CsEdit (unordered_map <int, CStation>& csm)
+void EditWorkshops(int id, unordered_map <int, CStation>& csm)
 {
     int AddRemoveWorkshop;
+    cout << "\n 1. Запустить цехи \n 2. Остановить цехи\n" << endl;
+    if (GetLimValue(1,2) == 1)
+    {
+        cout << "\nСколько еще цехов привести в работу?\n" <<endl;
+        while (((cin >> AddRemoveWorkshop).fail()) || (cin.peek() != '\n') || (AddRemoveWorkshop <= 0) || (AddRemoveWorkshop+csm.at(id).WorkingNum > csm.at(id).WorkshopsNum))
+        {
+            if ((AddRemoveWorkshop+csm.at(id).WorkingNum) > csm.at(id).WorkshopsNum)
+            {
+                cout << "\nКоличество работающих цехов не может превышать общее количество цехов, введите корректное значение\n" << endl;
+                cin.clear(); 
+                cin.ignore(INT_MAX,'\n');
+            }
+            else
+            {
+                CinClear();
+            }
+        }
+        csm.at(id).WorkingNum+=AddRemoveWorkshop;
+    }
+    else
+    {
+        cout << "\nСколько цехов нужно остановить?" <<endl;
+        while (((cin >> AddRemoveWorkshop).fail()) || (cin.peek() != '\n') || (AddRemoveWorkshop <= 0) || ((csm.at(id).WorkingNum - AddRemoveWorkshop) < 0))
+        {
+            if ((csm.at(id).WorkingNum - AddRemoveWorkshop) < 0)
+            {
+                cout << "\nКоличество работающих цехов не может быть меньше нуля, введите корректное значение" << endl;
+                cin.clear();
+                cin.ignore(INT_MAX,'\n');
+            }
+            else
+            {
+                CinClear();
+            }
+        }    
+        csm.at(id).WorkingNum-=AddRemoveWorkshop;
+    }
+}
+
+void CsEdit (unordered_map <int, CStation>& csm)
+{
     int id;
     if (csm.size()==0)
     {
@@ -278,7 +328,7 @@ void CsEdit (unordered_map <int, CStation>& csm)
     else
     {
         cout << "\nКакую операцию вы хотите совершить? \n0) Удаление КС \n1) Редактирование КС\n" << endl;
-        if (choice() == 0)
+        if (GetLimValue(0,1) == 0)
         {
             cout << "\nКакую КС удалить?" << endl;
             id = IdCheck(csm);
@@ -290,93 +340,67 @@ void CsEdit (unordered_map <int, CStation>& csm)
             cout << "\nКакую КС отредактировать?" << endl;
             id = IdCheck(csm);
             auto cs = csm.find(id);
-            cout << "\n 0. Запустить цехи \n 1. Остановить цехи\n" << endl;
-            if (choice() == 0)
-            {
-                cout << "\nСколько еще цехов привести в работу?\n" <<endl;
-                while (((cin >> AddRemoveWorkshop).fail()) || (cin.peek() != '\n') || (AddRemoveWorkshop <= 0) || (AddRemoveWorkshop+csm.at(id).WorkingNum > csm.at(id).WorkshopsNum))
-                {
-                    if ((AddRemoveWorkshop+csm.at(id).WorkingNum) > csm.at(id).WorkshopsNum)
-                    {
-                        cout << "\nКоличество работающих цехов не может превышать общее количество цехов, введите корректное значение\n" << endl;
-                        cin.clear(); 
-                        cin.ignore(INT_MAX,'\n');
-                    }
-                    else
-                    {
-                        CinClear();
-                    }
-                }
-                csm.at(id).WorkingNum+=AddRemoveWorkshop;
-            }
-            else
-            {
-                cout << "\nСколько цехов нужно остановить?" <<endl;
-                while (((cin >> AddRemoveWorkshop).fail()) || (cin.peek() != '\n') || (AddRemoveWorkshop <= 0) || ((csm.at(id).WorkingNum - AddRemoveWorkshop) < 0))
-                {
-                    if ((csm.at(id).WorkingNum - AddRemoveWorkshop) < 0)
-                    {
-                        cout << "\nКоличество работающих цехов не может быть меньше нуля, введите корректное значение" << endl;
-                        cin.clear();
-                        cin.ignore(INT_MAX,'\n');
-                    }
-                    else
-                    {
-                        CinClear();
-                    }
-                }    
-                csm.at(id).WorkingNum-=AddRemoveWorkshop;
-            }
+            EditWorkshops(id, csm);
         } 
     }
 }
 
-ostream& operator << (ostream& os, unordered_map <int, Pipes>& pm)
+void ShowParameters (unordered_map <int, Pipes>& pm, unordered_map <int, CStation>& csm)
 {
     if (pm.size() !=0) 
     {
         cout << "\n Параметры труб:" << endl;
         for (auto pipe: pm) 
         {
-            if (pipe.second.repair == false)
-            {
-                    cout << endl << pipe.first << ") Параметры трубы с названием " << pipe.second.pname << ":" << "\n   Длина трубы: " << pipe.second.length 
-                    << "\n   Диаметр трубы: " << pipe.second.diameter;
-                    cout << "\n   Труба находится в ремонте" << endl;
-            }
-            else
-            {
-                    cout << endl<< pipe.first << ") Параметры трубы с названием " << pipe.second.pname << ":" << "\n   Длина трубы: " << pipe.second.length
-                    << "\n   Диаметр трубы: " << pipe.second.diameter;
-                    cout << "\n   Труба находится в работе" << endl;
-            }
+            cout << pipe.second;
         } 
     }
     else
     {
         cout << "\n Нет ни одной трубы" << endl;
     }    
-    return os;
-}
-
-ostream& operator << (ostream& os, unordered_map <int, CStation>& csm)
-{
     if (csm.size() !=0)
     {
         cout << "\n Параметры компрессорных станций:" << endl;
         for (auto cs: csm)
             {
-                cout << endl << cs.first << ") Название компрессорной станции: " << cs.second.name;
-                cout << "\n   Количество цехов компрессорной станции: " << cs.second.WorkshopsNum;
-                cout << "\n   Количество работающих цехов компрессорной станции: " << cs.second.WorkingNum;
-                cout << "\n   Эффективность компрессорной станции (от 1 до 100): " <<  cs.second.efficiency << endl << endl;
+                cout << cs.second;
             }
     }
     else
     {
         cout << "\n Нет ни одной КС" << endl;
-    }    
-    return os;
+    } 
+}
+
+ofstream& operator << (ofstream& file, Pipes& pipe)
+{
+    file << pipe.PipeIndx << endl << pipe.pname << endl << pipe.length << endl << pipe.diameter << endl << pipe.repair << endl;
+    return file;
+}
+
+ofstream& operator << (ofstream& file, CStation& cs)
+{
+    file << cs.CsIndx << endl << cs.name << endl << cs.WorkshopsNum << endl << cs.WorkingNum << endl << cs.efficiency << endl;    
+    return file;
+}
+
+ifstream& operator >> (ifstream& file, Pipes& pipe)
+{
+    file >> pipe.PipeIndx;
+    file.ignore();
+    getline(file, pipe.pname);
+    file >> pipe.length >> pipe.diameter >> pipe.repair;
+    return file;
+}
+
+ifstream& operator >> (ifstream& file, CStation& cs)
+{
+    file >> cs.CsIndx;
+    file.ignore();
+    getline(file, cs.name);
+    file >> cs.WorkshopsNum >> cs.WorkingNum >> cs.efficiency;  
+    return file; 
 }
 
 void SaveParameters (unordered_map <int, Pipes>& pm, unordered_map <int, CStation>& csm)
@@ -395,11 +419,11 @@ void SaveParameters (unordered_map <int, Pipes>& pm, unordered_map <int, CStatio
         file << pm.size() << endl << csm.size() << endl;
         for (auto pipe: pm)
         {
-        file << pipe.first << endl << pipe.second.pname << endl << pipe.second.length << endl << pipe.second.diameter << endl << pipe.second.repair << endl;
+            file << pipe.second;
         }
         for (auto cs: csm)
         {
-        file << cs.first << endl << cs.second.name << endl << cs.second.WorkshopsNum << endl << cs.second.WorkingNum << endl << cs.second.efficiency << endl;    
+            file << cs.second;
         }
     }
     file.close();
@@ -408,8 +432,6 @@ void SaveParameters (unordered_map <int, Pipes>& pm, unordered_map <int, CStatio
 void LoadParameters (unordered_map <int, Pipes>& pm, unordered_map <int, CStation>& csm)
 {
     int i;
-    int pipes_amount;
-    int cs_amount;
     ifstream file;
     string filename;
     pm.clear();
@@ -425,43 +447,34 @@ void LoadParameters (unordered_map <int, Pipes>& pm, unordered_map <int, CStatio
     }
     else
     {
-    file >> pipes_amount;
-    file >> cs_amount;
-    for (i = 0; i < pipes_amount; ++i)
-    {
-        file >> p.PipeIndx;
-        file.ignore();
-        getline(file, p.pname);
-        file >> p.length >> p.diameter >> p.repair;
-        pm.insert({p.PipeIndx, p});
-    }
-    for (i = 0; i < cs_amount; ++i)
-    {
-        file >> cs.CsIndx;
-        file.ignore();
-        getline(file, cs.name);
-        file >> cs.WorkshopsNum >> cs.WorkingNum >> cs.efficiency;   
-        csm.insert({cs.CsIndx, cs});            
-    }
+        file >> PipeIndx;
+        file >> CsIndx;
+        for (i = 0; i < PipeIndx; ++i)
+        {
+            file >> p;
+            pm.insert({p.PipeIndx, p});
+        }
+        for (i = 0; i < CsIndx; ++i)
+        {
+            file >> cs;  
+            csm.insert({cs.CsIndx, cs});            
+        }
     }
     file.close();
     cout << "\nДанные успешно извлечены!" << endl;          
 }
 
-void PipeFilter (unordered_map <int, Pipes>& pm)
+unordered_set <int> PipeFilter (unordered_map <int, Pipes>& pm)
 {
+    unordered_set <int> PIndx;
     int choice;
-    unordered_map<int, Pipes> Chosen;
     cout << "\nПо какому признаку отфильтровать трубы?" <<endl;
     cout << "1) По названию" <<endl;
     cout << "2) Вывести рабочие трубы" <<endl;
     cout << "3) Вывести трубы, находящиеся в ремонте\n" <<endl;
-    while (((cin >> choice).fail()) || (cin.peek() != '\n') || ((choice !=1) && (choice !=2) && (choice !=3)))
-        {
-            CinClear();
-        }
+    choice = GetLimValue(1,3);
     if (choice == 1)
-    {
+     {
         string name;
         cout << "\nПо какому названию отфильтровать трубы?\n" << endl;
         cin >> name;
@@ -469,7 +482,7 @@ void PipeFilter (unordered_map <int, Pipes>& pm)
         {
 			if (pipe.second.pname.find(name) != string::npos) 
             {
-				Chosen.insert(pipe);
+				PIndx.insert(pipe.first);
 			}
 		}
     }
@@ -479,7 +492,7 @@ void PipeFilter (unordered_map <int, Pipes>& pm)
         {
 			if (pipe.second.repair == true) 
             {
-				Chosen.insert(pipe);
+				PIndx.insert(pipe.first);
 			}
 		}        
     }
@@ -489,25 +502,26 @@ void PipeFilter (unordered_map <int, Pipes>& pm)
         {
 			if (pipe.second.repair == false) 
             {
-				Chosen.insert(pipe);
+				PIndx.insert(pipe.first);
 			}
 		}       
     }
-    cout << Chosen;
+    for (auto id: PIndx)
+    {
+        cout << pm[id];
+    }
+    return PIndx;
 }
 
-void CsFilter (unordered_map <int, CStation>& csm)
+unordered_set <int> CsFilter (unordered_map <int, CStation>& csm)
 {
     int choice;
     int percent;
-    unordered_map<int, CStation> Chosen;
+    unordered_set <int> CIndx;
     cout << "\nПо какому признаку отфильтровать компрессорные станции" <<endl;
     cout << "1) По названию" <<endl;
     cout << "2) По заданному проценту незадействованных цехов\n" <<endl;
-    while (((cin >> choice).fail()) || (cin.peek() != '\n') || ((choice !=1) && (choice !=2)))
-        {
-            CinClear();
-        }
+    choice = GetLimValue(1,2);
     if (choice == 1)
     {
         string findname;
@@ -517,7 +531,7 @@ void CsFilter (unordered_map <int, CStation>& csm)
         {
 			if (cs.second.name.find(findname) != string::npos) 
             {
-				Chosen.insert(cs);
+				CIndx.insert(cs.first);
 			}
 		}
     }
@@ -528,19 +542,16 @@ void CsFilter (unordered_map <int, CStation>& csm)
         cout << "1) Процент незадействованных цехов равен данному проценту" <<endl;
         cout << "2) Процент незадействованных цехов больше заданного процента" <<endl;
         cout << "3) Процент незадействованных цехов меньше заданного процента\n" <<endl;
-        while (((cin >> NewChoice).fail()) || (cin.peek() != '\n') || ((NewChoice !=1) && (NewChoice !=2) && (NewChoice != 3)))
-        {
-            CinClear();
-        }
+        NewChoice = GetLimValue(1,3);
         cout << "\nВведите процент незадействованных цехов для фильра" << endl;
-        percent = GetEfficiency();
+        percent = GetLimValue(0,100);
         if (NewChoice == 1)
         {
             for (auto& cs : csm) 
             {
                 if (((cs.second.WorkshopsNum-cs.second.WorkingNum)*100/cs.second.WorkshopsNum) == percent) 
                 {
-                    Chosen.insert(cs);
+                    CIndx.insert(cs.first);
                 }
             } 
         }
@@ -550,7 +561,7 @@ void CsFilter (unordered_map <int, CStation>& csm)
             {
                 if (((cs.second.WorkshopsNum-cs.second.WorkingNum)*100/cs.second.WorkshopsNum) > percent) 
                 {
-                    Chosen.insert(cs);
+                    CIndx.insert(cs.first);
                 }
             } 
         }
@@ -560,10 +571,55 @@ void CsFilter (unordered_map <int, CStation>& csm)
             {
                 if (((cs.second.WorkshopsNum-cs.second.WorkingNum)*100/cs.second.WorkshopsNum) < percent) 
                 {
-                    Chosen.insert(cs);
+                    CIndx.insert(cs.first);
                 }
             } 
         }     
     }
-    cout << Chosen;
+    for (auto id: CIndx)
+    {
+        cout << csm[id];
+    }   
+    return CIndx;
 }
+
+void PBatchEdit (unordered_map <int, Pipes>& pm)
+{
+    int choice;
+    bool rep;
+    unordered_set <int> set;
+    cout << "\nКакие трубы нужно отредактировать?" << endl;
+    cout << "1) Выбрать по фильтру" << endl;
+    cout << "2) Выбрать вручную\n" << endl;
+    choice = GetLimValue(1,2);
+    if (choice == 1)
+    {
+        set = PipeFilter(pm);
+        cout << "\n 1) Поставить все на работу\n 0) Отправить все на ремонт" << endl;
+        rep = (GetLimValue(0,1));
+        for (auto& i: set)
+        {
+            pm[i].repair = rep;
+        }
+    }
+    else
+    {
+        cout << "\nСколько труб в сумме вы хотите отредактировать\n" << endl;
+        int amount;
+        amount = GetLimValue(0, (int)pm.size());
+        cout << "Поочередно вписывайте номера труб" << endl;
+        int num;
+        for (int i = 0; i < amount; i++)
+        {
+            num = IdCheck(pm);
+            set.insert(num);
+        }
+        cout << "\n 1) Поставить все на работу\n 0) Отправить все на ремонт" << endl;
+        rep = GetLimValue(0, 1);
+        for (auto& i : set)
+        {
+        pm[i].repair = rep;
+        }
+    }
+}
+
