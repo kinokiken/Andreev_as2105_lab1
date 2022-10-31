@@ -3,8 +3,6 @@
 #include <string>
 #include <unordered_map>
 #include <unordered_set>
-int PipeIndx = 0;
-int CsIndx = 0;
 
 using namespace std;
 
@@ -37,6 +35,9 @@ public:
     friend ofstream& operator << (ofstream& file, CStation& cs);
     friend ifstream& operator >> (ifstream& file, CStation& cs);
 };
+
+int Pplus = 0;
+int Cplus = 0;
 
 int Menu();
 
@@ -186,7 +187,7 @@ T GetLimValue(T min, T max)
 
 istream& operator >> (istream& is, Pipes& pipe)
 {
-    pipe.PipeIndx = ++PipeIndx;
+    pipe.PipeIndx = ++Pplus;
     cout << "\nЗадайте название данной трубы:" << endl;
     cin.clear();
     cin.ignore(INT_MAX, '\n');
@@ -210,7 +211,7 @@ ostream& operator << (ostream& os, Pipes& pipe)
 
 istream& operator >> (istream& is, CStation& cs)
 {
-    cs.CsIndx = ++CsIndx;
+    cs.CsIndx = ++Cplus;
     cout << "\nЗадайте название компрессорной станции:" << endl;
     cin.clear();
     cin.ignore(INT_MAX, '\n');
@@ -453,14 +454,14 @@ void LoadParameters (unordered_map <int, Pipes>& pm, unordered_map <int, CStatio
     }
     else
     {
-        file >> PipeIndx;
-        file >> CsIndx;
-        for (i = 0; i < PipeIndx; ++i)
+        file >> Pplus;
+        file >> Cplus;
+        for (i = 0; i < Pplus; ++i)
         {
             file >> p;
             pm.insert({p.PipeIndx, p});
         }
-        for (i = 0; i < CsIndx; ++i)
+        for (i = 0; i < Cplus; ++i)
         {
             file >> cs;  
             csm.insert({cs.CsIndx, cs});            
