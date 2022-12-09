@@ -1,13 +1,92 @@
+#include "process.h"
+#include "pipe.h"
+#include "cs.h"
 #include "Utils.h"
-
+#include <iostream>
+#include <fstream>
+#include <string>
+#include <vector>
+#include <unordered_map>
+#include <unordered_set>
 using namespace std;
 
-int Menu()
+int All::check_exist(int x) {
+    while (csm.find(x) == csm.end()) {
+        cout << "Нет такой КС, введите другой индекс" << endl;
+        x = GetLimValue(0, INT_MAX);
+    }
+    return x;
+}
+
+int All::check_p(int x) {
+    int j = 0;
+    if (graph.size() != 0) {
+        for (auto& i : graph) {
+            if ((i.second.id_ent == x) or (i.second.id_ex == x))
+                j++;
+        }
+    }
+    return j;
+}
+
+int All::System::max_ids = 0;
+
+int All::check_graph(int x) {
+    while (check_p(x) >= csm[x].GetPshops()) {
+        cout << "Выберите другую КС" << endl;
+        x = GetLimValue(0, INT_MAX);
+
+    }
+    return x;
+}
+
+bool All::check_used(int x, int y) 
+{
+    int k = 0;
+    for (auto& i : graph) 
+    {
+        if ((i.second.id_ent == x and i.second.id_ex == y) or (i.second.id_ent == y and i.second.id_ex == x)) 
+        {
+            k++;
+            cout << "Такая связь существует" << endl;
+        }
+        if (k == 0)
+            return true;
+        else
+            return false;
+    }
+}
+
+bool All::check_i(int x) {
+    int n = 0;
+    for (auto& i : graph)
+        if (i.second.id_pip == x)
+            n++;
+    if (n == 0)
+        return true;
+
+    else return false;
+}
+
+int All::edge(int x) {
+    int k = -1;
+    for (auto& i : pm) {
+        if (i.second.GetDiam() == x) {
+            if (check_i(i.first)) {
+                k = i.first;
+                return k;
+            }
+        }
+    }
+    return k;
+}
+
+int All::Menu()
 {
     int MenuChoice;
     cout << "\n 1. Добавить трубу\n 2. Добавить КС\n 3. Просмотр всех объектов\n 4. Редактировать трубу\n 5. Редактировать КС " << endl;
     cout << " 6. Сохранить\n 7. Загрузить\n 8. Фильтр труб\n 9. Фильтр КС\n 10. Пакетное редактирование труб " << endl; 
-    cout << " 11. Пакетное редактирование КС\n 0. Выход\n"<<endl;
+    cout << " 11. Пакетное редактирование КС\n 12. Создать сеть\n 0. Выход\n"<<endl;
     while (((cin >> MenuChoice).fail()) || (cin.peek() != '\n'))
     {
         cout << "\n Введите цифру для начала работы\n" << endl;
@@ -17,7 +96,7 @@ int Menu()
     return MenuChoice;
 }
 
-void SaveParameters (unordered_map <int, Pipes>& pm, unordered_map <int, CStation>& csm)
+void All::SaveParameters (unordered_map <int, Pipes>& pm, unordered_map <int, CStation>& csm)
 {
     string filename;
     ofstream file;
@@ -43,7 +122,7 @@ void SaveParameters (unordered_map <int, Pipes>& pm, unordered_map <int, CStatio
     file.close();
 }
 
-void LoadParameters (unordered_map <int, Pipes>& pm, unordered_map <int, CStation>& csm)
+void All::LoadParameters (unordered_map <int, Pipes>& pm, unordered_map <int, CStation>& csm)
 {
     int i, a , b;
     ifstream file;
@@ -75,12 +154,12 @@ void LoadParameters (unordered_map <int, Pipes>& pm, unordered_map <int, CStatio
             file >> cs;  
             csm.insert({cs.GetCid(), cs});            
         }
+        cout << "\nДанные успешно извлечены!" << endl; 
     }
-    file.close();
-    cout << "\nДанные успешно извлечены!" << endl;          
+    file.close();         
 }
 
-void ShowCsParameters (unordered_map <int, CStation>& csm)
+void All::ShowCsParameters (unordered_map <int, CStation>& csm)
 {   
     if (csm.size() !=0)
     {
@@ -96,7 +175,7 @@ void ShowCsParameters (unordered_map <int, CStation>& csm)
     } 
 }
 
-void CsEdit (unordered_map <int, CStation>& csm)
+void All::CsEdit (unordered_map <int, CStation>& csm)
 {
     int id;
     if (csm.size()==0)
@@ -117,13 +196,12 @@ void CsEdit (unordered_map <int, CStation>& csm)
         {
             cout << "\nКакую КС отредактировать?" << endl;
             id = IdCheck(csm);
-            auto cs = csm.find(id);
             EditWorkshops(id, csm);
         } 
     }
 }
 
-void EditWorkshops(int id, unordered_map <int, CStation>& csm)
+void All::EditWorkshops(int id, unordered_map <int, CStation>& csm)
 {
     int AddRemoveWorkshop;
     int a;
@@ -173,7 +251,7 @@ void EditWorkshops(int id, unordered_map <int, CStation>& csm)
     }
 }
 
-unordered_set <int> CsFilter (unordered_map <int, CStation>& csm)
+unordered_set <int> All::CsFilter (unordered_map <int, CStation>& csm)
 {
     int choice;
     int percent;
@@ -250,10 +328,9 @@ unordered_set <int> CsFilter (unordered_map <int, CStation>& csm)
     return CIndx;
 }
 
-void CsBatchEdit (unordered_map <int, CStation>& csm)
+void All::CsBatchEdit (unordered_map <int, CStation>& csm)
 {
     int choice;
-    bool rep;
     unordered_set <int> set;
     cout << "\nКакие КС нужно отредактировать/удалить?" << endl;
     cout << "1) Выбрать по фильтру" << endl;
@@ -318,7 +395,7 @@ void CsBatchEdit (unordered_map <int, CStation>& csm)
     }  
 }
 
-void PipeEdit(unordered_map <int, Pipes>& pm)
+void All::PipeEdit(unordered_map <int, Pipes>& pm)
 {
     int id;
     if (pm.size()==0) 
@@ -339,7 +416,6 @@ void PipeEdit(unordered_map <int, Pipes>& pm)
         {
             cout << "\nКакую трубу отправить в ремонт или вернуть на работу?" << endl;
             id = IdCheck(pm);
-            auto pipe = pm.find(id);
             if (pm.at(id).GetRepair() == true)
             {
                 pm.at(id).SetRepair(false);
@@ -354,7 +430,7 @@ void PipeEdit(unordered_map <int, Pipes>& pm)
     }
 }
 
-void ShowPipeParameters (unordered_map <int, Pipes>& pm)
+void All::ShowPipeParameters (unordered_map <int, Pipes>& pm)
 {
     if (pm.size() !=0) 
     {
@@ -370,7 +446,7 @@ void ShowPipeParameters (unordered_map <int, Pipes>& pm)
     }    
 }
 
-unordered_set <int> PipeFilter (unordered_map <int, Pipes>& pm)
+unordered_set <int> All::PipeFilter (unordered_map <int, Pipes>& pm)
 {
     unordered_set <int> PIndx;
     int choice;
@@ -426,7 +502,7 @@ unordered_set <int> PipeFilter (unordered_map <int, Pipes>& pm)
     return PIndx;
 }
 
-void PBatchEdit (unordered_map <int, Pipes>& pm)
+void All::PBatchEdit (unordered_map <int, Pipes>& pm)
 {
     int choice;
     int rep;
@@ -491,4 +567,55 @@ void PBatchEdit (unordered_map <int, Pipes>& pm)
             cout << "Передумали? Возвращаем в меню" << endl;
         }
     }
+}
+
+ostream& operator<<(ostream& out, unordered_set<int> s) {
+    cout << "Объекты: ";
+    for (auto& i : s)
+        cout << i << " ";
+    cout << endl;
+    return out;
+}
+
+istream& operator >>(istream& in, All& gts) {
+    All::System sys;
+    cout << gts.csm;
+    cout << "\nВыберите номер КС на входе: " << endl;
+    sys.id_ent = GetLimValue(0, INT_MAX);
+    sys.id_ent = gts.check_exist(sys.id_ent);
+    sys.id_ent = gts.check_graph(sys.id_ent);
+    cout << gts.csm;
+    cout << "\nВыберите номер КС на выходе" << endl;
+    sys.id_ex = GetLimValue(0, INT_MAX);
+    while (sys.id_ex == sys.id_ent) {
+        cout << "\nВыберите другой номер КС" << endl;
+        sys.id_ex = GetLimValue(0, INT_MAX);
+    }
+    sys.id_ex = gts.check_exist(sys.id_ex);
+    sys.id_ex = gts.check_graph(sys.id_ex);
+    if (gts.check_used(sys.id_ent, sys.id_ex)) {
+        cout << "\nВыберите диаметр трубы: 500, 700 or 1400" << endl;
+        double dia_pipe = GetLimValue(500.0, 1400.0);
+        int k = gts.edge(dia_pipe);
+        while (gts.pm.find(k) == gts.pm.end()) {
+            cout << "\nА такой трубы нет, 1.Выбрать другую  2.Создать" << endl;
+            int choice = GetLimValue(1, 2);
+            if (choice == 2) {
+                Pipes p;
+                cin >> p;
+                gts.pm.insert({ p.GetPid(), p });
+            }
+            cout << "\nВведите диаметр: 500, 700 or 1400" << endl;
+            dia_pipe = GetLimValue(0.0, 10000000.0);
+            k = gts.edge(dia_pipe);
+            cout << k<< endl;
+        }
+        sys.id_pip = k;
+
+        gts.graph.insert({ sys.id, sys });
+    }
+    else {
+        return in;
+    }
+    return in;
 }

@@ -3,9 +3,10 @@
 #include <string>
 #include <unordered_map>
 #include <unordered_set>
-#include "Utils.cpp"
-#include "cs.cpp"
-#include "pipe.cpp"
+#include "Utils.h"
+#include "process.h"
+#include "cs.h"
+#include "pipe.h"
 
 using namespace std;
 
@@ -15,51 +16,73 @@ int main()
 
     Pipes P;
     CStation CS;
-    unordered_map<int, Pipes> pipes_map;
-    unordered_map<int, CStation> cs_map;
+    All A;
+    unordered_map<int, Pipes> pm;
+    unordered_map<int, CStation> csm;
 
     while (true)
     {
-        switch(Menu())
+        switch(A.Menu())
         {
         case 1:{
             cin >> P;
-            pipes_map.insert({P.GetPid(), P});
+            A.pm.insert({P.GetPid(), P});
             break;}
         case  2:{
             cin >> CS;
-            cs_map.insert({CS.GetCid(), CS});
+            A.csm.insert({CS.GetCid(), CS});
             break;}
         case 3:{
-            ShowPipeParameters (pipes_map);
-            ShowCsParameters (cs_map);
+            A.ShowPipeParameters (A.pm);
+            A.ShowCsParameters (A.csm);
             break;}
         case 4:
-            PipeEdit(pipes_map);
+            A.PipeEdit(A.pm);
             break;
         case 5:
-            CsEdit(cs_map);
+            A.CsEdit(A.csm);
             break;
         case 6:
-            SaveParameters (pipes_map, cs_map);
+            A.SaveParameters (A.pm, A.csm);
             break;
         case 7:
-            LoadParameters (pipes_map, cs_map);
-            P.Pplus = pipes_map.size();
-            CS.Cplus = cs_map.size();
+            A.LoadParameters (A.pm, A.csm);
+            P.Pplus = A.pm.size();
+            CS.Cplus = A.csm.size();
             break;
         case 8:
-            PipeFilter(pipes_map);
+            A.PipeFilter(pm);
             break;
         case 9:
-            CsFilter(cs_map);
+            A.CsFilter(csm);
             break;
         case 10:
-            PBatchEdit(pipes_map);
+            A.PBatchEdit(pm);
             break;
         case 11:
-            CsBatchEdit(cs_map);
+            A.CsBatchEdit(csm);
             break;
+        case 12: {
+            cout << "Что сделать: 1. Присоединить 0. Отсоединить\n" << endl;
+            int chose = GetLimValue(0, 1);
+            if (chose == 1) 
+            {
+                if ((A.csm.size() < 2) or (A.pm.size() < 1))
+                    cout << "Недостаточно объектов для создания сети\n" << endl;
+                else
+                    cin >> A;
+            }
+            else
+                if (A.graph.size() != 0)
+                    cout << "\nProverim pozhe";
+                else
+                    cout << "There is no systems!"<<endl;
+
+            for (auto& [i, j] : A.graph)
+                cout << i << ") " << j.id_ent << " " << j.id_ex << " " << j.id_pip << endl;
+
+            break;
+        }
         case 0:
             return 0;
             break;

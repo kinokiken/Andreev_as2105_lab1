@@ -18,6 +18,7 @@ public:
     friend ifstream& operator >> (ifstream& file, Pipes& pipe);
 
     int GetPid ();
+    float GetDiam();
     int up_pid();
     bool GetRepair();
     void SetRepair(bool a);

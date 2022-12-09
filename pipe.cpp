@@ -10,6 +10,11 @@ int Pipes::GetPid ()
     return PipeIndx;
 }
 
+float Pipes::GetDiam()
+{
+    return diameter;
+}
+
 int Pipes::up_pid() 
 {
     return PipeIndx = ++Pplus;

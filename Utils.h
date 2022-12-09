@@ -43,26 +43,12 @@ T GetLimValue(T min, T max)
     return value;
 }
 
-int Menu();
-
-void SaveParameters (unordered_map <int, Pipes>& pm, unordered_map <int, CStation>& csm);
-
-void LoadParameters (unordered_map <int, Pipes>& pm, unordered_map <int, CStation>& csm);
-
-void ShowCsParameters (unordered_map <int, CStation>& csm);
-
-void CsEdit (unordered_map <int, CStation>& csm);
-
-void EditWorkshops(int id, unordered_map <int, CStation>& csm);
-
-unordered_set <int> CsFilter (unordered_map <int, CStation>& csm);
-
-void CsBatchEdit (unordered_map <int, CStation>& csm);
-
-void PipeEdit(unordered_map <int, Pipes>& pm);
-
-void ShowPipeParameters (unordered_map <int, Pipes>& pm);
-
-unordered_set <int> PipeFilter (unordered_map <int, Pipes>& pm);
-
-void PBatchEdit (unordered_map <int, Pipes>& pm);
+template <typename T>
+ostream& operator<< (ostream& out, unordered_map <int, T>& pm) {
+    out << "Доступые id: ";
+    for (auto& [i, obj] : pm) {
+        out << i << " ";
+    }
+    out << endl;
+    return out;
+}
