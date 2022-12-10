@@ -10,6 +10,8 @@
 
 using namespace std;
 
+void create_graph(All& c);
+
 int main()
 {
     setlocale(LC_ALL, "rus"); 
@@ -63,24 +65,7 @@ int main()
             A.CsBatchEdit(csm);
             break;
         case 12: {
-            cout << "Что сделать: 1. Присоединить 0. Отсоединить\n" << endl;
-            int chose = GetLimValue(0, 1);
-            if (chose == 1) 
-            {
-                if ((A.csm.size() < 2) or (A.pm.size() < 1))
-                    cout << "Недостаточно объектов для создания сети\n" << endl;
-                else
-                    cin >> A;
-            }
-            else
-                if (A.graph.size() != 0)
-                    cout << "\nProverim pozhe";
-                else
-                    cout << "There is no systems!"<<endl;
-
-            for (auto& [i, j] : A.graph)
-                cout << i << ") " << j.id_ent << " " << j.id_ex << " " << j.id_pip << endl;
-
+            create_graph(A);
             break;
         }
         case 0:
@@ -91,4 +76,53 @@ int main()
             break;
         }
     }
+}
+
+void create_graph(All& c) 
+{
+    if (c.graph.size() != 0) 
+    {
+        cout << "Связи: " << endl;
+        for (auto& [i, j] : c.graph)
+            cout << i << ") " << j.id_ent << " " << j.id_ex << " " << j.id_pip << endl;
+    }
+    cout << "\nЧто сделать: 1. Присоединить 2. Отсоединить 3. Топологическая сортировка\n" << endl;
+    int chose = GetLimValue(1, 3);
+    if (chose == 1) 
+    {
+        if ((c.csm.size() < 2) or (c.pm.size() < 1))
+            cout << "Недостаточно объектов для создания сети\n" << endl;
+        else
+            cin >> c;
+    }
+    else if (chose == 3)
+    {
+        c.fill_graphl(c.graph);
+        c.sort();
+    }
+    else
+    {
+        if (c.graph.size() != 0) {
+            cout << "Введите номер КС на входе: " << endl;
+            int ent = GetLimValue(0, CStation::Cplus);
+            cout << "Введите номер КС на выходе: " << endl;
+            int ext = GetLimValue(0, CStation::Cplus);
+            if (ent == ext) 
+            {
+                cout << "Выберите другую КС!: ";
+                ext = GetLimValue(0, CStation::Cplus);
+            }
+            auto a = c.graph.cbegin();
+            while (a != c.graph.cend()) {
+                if (((*a).second.id_ent == ent) and ((*a).second.id_ex == ext)) {
+                    c.graph.erase(a);
+                    break;
+                }
+                a++;
+            }
+        }
+    }
+    cout << endl;
+    for (auto& [i, j] : c.graph)
+        cout << i << ") " << j.id_ent << " " << j.id_ex << " " << j.id_pip << endl;
 }

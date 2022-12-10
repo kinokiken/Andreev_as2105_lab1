@@ -50,35 +50,79 @@ bool All::check_used(int x, int y)
             k++;
             cout << "Такая связь существует" << endl;
         }
+    }
         if (k == 0)
             return true;
         else
             return false;
-    }
 }
 
 bool All::check_i(int x) {
     int n = 0;
     for (auto& i : graph)
+    {
         if (i.second.id_pip == x)
+        {
             n++;
+        } 
+    }
     if (n == 0)
+    {
         return true;
-
-    else return false;
+    }
+    else
+    {
+        return false;
+    }
 }
 
-int All::edge(int x) {
+int All::edge(float x) {
     int k = -1;
-    for (auto& i : pm) {
-        if (i.second.GetDiam() == x) {
-            if (check_i(i.first)) {
+    for (auto& i : pm) 
+    {
+        if (i.second.GetDiam() == x) 
+        {
+            if (check_i(i.first)) 
+            {
                 k = i.first;
-                return k;
             }
         }
     }
     return k;
+}
+
+void All::topologicalSortUtil(int V, unordered_map<int, bool>& visited, stack<int>& SortedV) {
+    visited[V] = true;
+    list<System>::iterator i;
+    for (i = Graph_l[V].begin(); i != Graph_l[V].end(); ++i)
+        if (!visited[i->id_ex])
+            topologicalSortUtil((*i).id_ex, visited, SortedV);
+    SortedV.push(V);
+    while (SortedV.empty() != false)
+        cout << SortedV.top()<<endl;
+}
+
+void All::topologicalSort()
+{
+    stack <int> SortedV;
+    unordered_map <int, bool> visited;
+    for (auto& v : Graph_l)
+        visited.insert({ v.first, false });
+    for (auto& v : Graph_l){
+        if (!visited[v.first])
+            topologicalSortUtil(v.first, visited, SortedV);
+    }
+    while (SortedV.empty() == false) {
+        cout << SortedV.top() << " ";
+        SortedV.pop();
+    }
+}
+
+void All::sort() 
+{
+    All A;
+    A.fill_graphl(graph);
+    topologicalSort();
 }
 
 int All::Menu()
@@ -577,35 +621,39 @@ ostream& operator<<(ostream& out, unordered_set<int> s) {
     return out;
 }
 
-istream& operator >>(istream& in, All& gts) {
+istream& operator >>(istream& in, All& gts) 
+{
     All::System sys;
     cout << gts.csm;
-    cout << "\nВыберите номер КС на входе: " << endl;
+    cout << "Выберите номер КС на входе: " << endl;
     sys.id_ent = GetLimValue(0, INT_MAX);
     sys.id_ent = gts.check_exist(sys.id_ent);
     sys.id_ent = gts.check_graph(sys.id_ent);
     cout << gts.csm;
-    cout << "\nВыберите номер КС на выходе" << endl;
+    cout << "Выберите номер КС на выходе" << endl;
     sys.id_ex = GetLimValue(0, INT_MAX);
-    while (sys.id_ex == sys.id_ent) {
-        cout << "\nВыберите другой номер КС" << endl;
+    while (sys.id_ex == sys.id_ent) 
+    {
+        cout << "Выберите другой номер КС" << endl;
         sys.id_ex = GetLimValue(0, INT_MAX);
     }
     sys.id_ex = gts.check_exist(sys.id_ex);
     sys.id_ex = gts.check_graph(sys.id_ex);
-    if (gts.check_used(sys.id_ent, sys.id_ex)) {
-        cout << "\nВыберите диаметр трубы: 500, 700 or 1400" << endl;
+    if (gts.check_used(sys.id_ent, sys.id_ex)) 
+    {
+        cout << "Выберите диаметр трубы: 500, 700 или 1400" << endl;
         double dia_pipe = GetLimValue(500.0, 1400.0);
         int k = gts.edge(dia_pipe);
         while (gts.pm.find(k) == gts.pm.end()) {
-            cout << "\nА такой трубы нет, 1.Выбрать другую  2.Создать" << endl;
+            cout << "А такой трубы нет, 1.Выбрать другую  2.Создать" << endl;
             int choice = GetLimValue(1, 2);
-            if (choice == 2) {
+            if (choice == 2) 
+            {
                 Pipes p;
                 cin >> p;
                 gts.pm.insert({ p.GetPid(), p });
             }
-            cout << "\nВведите диаметр: 500, 700 or 1400" << endl;
+            cout << "Введите диаметр: 500, 700 или 1400" << endl;
             dia_pipe = GetLimValue(0.0, 10000000.0);
             k = gts.edge(dia_pipe);
             cout << k<< endl;
@@ -614,8 +662,18 @@ istream& operator >>(istream& in, All& gts) {
 
         gts.graph.insert({ sys.id, sys });
     }
-    else {
+    else 
+    {
         return in;
     }
     return in;
+}
+
+void All::fill_graphl(unordered_map<int, All::System>& sys) 
+{
+    Graph_l.clear();
+    for (auto& e : sys)
+    {
+        Graph_l[e.second.id_ent].push_back(e.second);
+    }
 }

@@ -3,6 +3,8 @@
 #include <fstream>
 #include <string>
 #include <vector>
+#include <stack>
+#include <list>
 #include <unordered_map>
 #include <unordered_set>
 #include "pipe.h"
@@ -25,7 +27,11 @@ public:
 
 	bool check_i(int x);
 
-	int edge(int x);
+	int edge(float x);
+
+	void topologicalSortUtil(int V, unordered_map<int, bool>& visited, stack<int>& SortedV);
+
+	void topologicalSort();
 
     int Menu();
 
@@ -62,6 +68,12 @@ public:
 		int id_pip;
 	};
 	unordered_map <int, System> graph;
+
+    unordered_map <int, list<System>> Graph_l;
+
+    void sort();
+
+	void fill_graphl(unordered_map<int, System>& sys);
 
 	friend istream& operator >> (istream& in, All& gts);
 
