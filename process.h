@@ -29,7 +29,7 @@ public:
 
 	int edge(float x);
 
-	void topologicalSortUtil(int V, unordered_map<int, bool>& visited, stack<int>& SortedV);
+	void topologicalSortUtil(int V, unordered_map<int, int>& visited, stack<int>& SortedV);
 
 	void topologicalSort();
 

@@ -91,12 +91,23 @@ int All::edge(float x) {
     return k;
 }
 
-void All::topologicalSortUtil(int V, unordered_map<int, bool>& visited, stack<int>& SortedV) {
-    visited[V] = true;
+void All::topologicalSortUtil(int V, unordered_map<int, int>& visited, stack<int>& SortedV) 
+{
+    visited[V] = 1;
     list<System>::iterator i;
     for (i = Graph_l[V].begin(); i != Graph_l[V].end(); ++i)
-        if (!visited[i->id_ex])
-            topologicalSortUtil((*i).id_ex, visited, SortedV);
+    {
+        try {
+            if (visited[i->id_ex] == 0)
+                topologicalSortUtil((*i).id_ex, visited, SortedV);
+            else if (visited[i->id_ex] == 1)
+                throw string("Найден цикл. Сортировать можно только ациклические графы");
+            }
+            catch (...) {
+                throw;
+            }
+    }
+    visited[V] = 2;
     SortedV.push(V);
     while (SortedV.empty() != false)
         cout << SortedV.top()<<endl;
@@ -105,14 +116,24 @@ void All::topologicalSortUtil(int V, unordered_map<int, bool>& visited, stack<in
 void All::topologicalSort()
 {
     stack <int> SortedV;
-    unordered_map <int, bool> visited;
+    unordered_map <int, int> visited;
     for (auto& v : Graph_l)
-        visited.insert({ v.first, false });
-    for (auto& v : Graph_l){
-        if (!visited[v.first])
-            topologicalSortUtil(v.first, visited, SortedV);
+        visited.insert({ v.first, 0 });
+    for (auto& v : Graph_l)
+    {
+        try
+        {
+            if (!visited[v.first])
+                topologicalSortUtil(v.first, visited, SortedV);
+        }
+        catch (string cycle) 
+        {
+            cout << cycle <<endl;
+            return;
+        }
     }
-    while (SortedV.empty() == false) {
+    while (SortedV.empty() == false) 
+    {
         cout << SortedV.top() << " ";
         SortedV.pop();
     }
@@ -130,7 +151,7 @@ int All::Menu()
     int MenuChoice;
     cout << "\n 1. Добавить трубу\n 2. Добавить КС\n 3. Просмотр всех объектов\n 4. Редактировать трубу\n 5. Редактировать КС " << endl;
     cout << " 6. Сохранить\n 7. Загрузить\n 8. Фильтр труб\n 9. Фильтр КС\n 10. Пакетное редактирование труб " << endl; 
-    cout << " 11. Пакетное редактирование КС\n 12. Создать сеть\n 0. Выход\n"<<endl;
+    cout << " 11. Пакетное редактирование КС\n 12. Редактировать связи\n 0. Выход\n"<<endl;
     while (((cin >> MenuChoice).fail()) || (cin.peek() != '\n'))
     {
         cout << "\n Введите цифру для начала работы\n" << endl;
