@@ -18,6 +18,12 @@ int All::check_exist(int x) {
     return x;
 }
 
+ifstream& operator >> (ifstream& fcin, All::System& tr) 
+{
+    fcin >> tr.id >> tr.id_ent  >> tr.id_ex >> tr.id_pip;
+    return fcin;
+}
+
 int All::check_p(int x) {
     int j = 0;
     if (graph.size() != 0) {
@@ -174,7 +180,7 @@ void All::SaveParameters (unordered_map <int, Pipes>& pm, unordered_map <int, CS
     }
     else
     {
-        file << pm.size() << endl << csm.size() << endl;
+        file << pm.size() << endl << csm.size() << endl << graph.size() << endl;
         for (auto pipe: pm)
         {
             file << pipe.second;
@@ -183,19 +189,24 @@ void All::SaveParameters (unordered_map <int, Pipes>& pm, unordered_map <int, CS
         {
             file << cs.second;
         }
+        for (auto gr: graph)
+        {
+            file << gr.first << "\n" << gr.second.id_ent << "\n" << gr.second.id_ex << "\n" << gr.second.id_pip << endl;;
+        }
     }
     file.close();
 }
 
-void All::LoadParameters (unordered_map <int, Pipes>& pm, unordered_map <int, CStation>& csm)
+void All::LoadParameters (unordered_map <int, Pipes>& pm, unordered_map <int, CStation>& csm,  unordered_map<int, System>& gr)
 {
-    int i, a , b;
+    int i, a , b, c;
     ifstream file;
     string filename;
     pm.clear();
     csm.clear();
     Pipes p;
     CStation cs;
+    All::System sys;
     cout << "Из какого файла брать данные?" << endl;
     cin >> filename;
     file.open(filename + ".txt");
@@ -207,8 +218,10 @@ void All::LoadParameters (unordered_map <int, Pipes>& pm, unordered_map <int, CS
     {
         file >> a;
         file >> b;
+        file >> c;
         p.SetPid(a);
         cs.SetCsid(b);
+        sys.id = c+1;
         for (i = 0; i < a; ++i)
         {
             file >> p;
@@ -218,6 +231,11 @@ void All::LoadParameters (unordered_map <int, Pipes>& pm, unordered_map <int, CS
         {
             file >> cs;  
             csm.insert({cs.GetCid(), cs});            
+        }
+        for (i = 0; i < c; ++i)
+        {
+            file >> sys;
+            gr.insert({ sys.id, sys });
         }
         cout << "\nДанные успешно извлечены!" << endl; 
     }
@@ -240,7 +258,7 @@ void All::ShowCsParameters (unordered_map <int, CStation>& csm)
     } 
 }
 
-void All::CsEdit (unordered_map <int, CStation>& csm)
+void All::CsEdit (unordered_map <int, CStation>& csm, unordered_map<int, System>& gr)
 {
     int id;
     if (csm.size()==0)
@@ -256,6 +274,19 @@ void All::CsEdit (unordered_map <int, CStation>& csm)
             id = IdCheck(csm);
             auto cs = csm.find(id);
             csm.erase(cs);
+            for (int i = 0; i < gr.size()+1; ++i)
+            {
+                auto a = gr.cbegin();
+                while (a != gr.cend()) 
+                {
+                    if (((*a).second.id_ent == id) || ((*a).second.id_ex == id))
+                    {
+                        gr.erase(a);
+                        break;
+                    }
+                    ++a;
+                }
+            }
         }
         else
         {
@@ -460,7 +491,7 @@ void All::CsBatchEdit (unordered_map <int, CStation>& csm)
     }  
 }
 
-void All::PipeEdit(unordered_map <int, Pipes>& pm)
+void All::PipeEdit(unordered_map <int, Pipes>& pm, unordered_map<int, System>& gr)
 {
     int id;
     if (pm.size()==0) 
@@ -476,6 +507,16 @@ void All::PipeEdit(unordered_map <int, Pipes>& pm)
             id = IdCheck(pm);
             auto pipe = pm.find(id);
             pm.erase(pipe);
+            auto a = gr.cbegin();
+            while (a != gr.cend()) 
+            {
+                if ((*a).second.id_pip == id) 
+                {
+                    gr.erase(a);
+                    break;
+                }
+                a++;
+            }
         }
         else
         {

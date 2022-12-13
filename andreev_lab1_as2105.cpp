@@ -19,8 +19,7 @@ int main()
     Pipes P;
     CStation CS;
     All A;
-    unordered_map<int, Pipes> pm;
-    unordered_map<int, CStation> csm;
+    All::System S;
 
     while (true)
     {
@@ -39,30 +38,31 @@ int main()
             A.ShowCsParameters (A.csm);
             break;}
         case 4:
-            A.PipeEdit(A.pm);
+            A.PipeEdit(A.pm, A.graph);
             break;
         case 5:
-            A.CsEdit(A.csm);
+            A.CsEdit(A.csm, A.graph);
             break;
         case 6:
             A.SaveParameters (A.pm, A.csm);
             break;
         case 7:
-            A.LoadParameters (A.pm, A.csm);
+            A.LoadParameters (A.pm, A.csm, A.graph);
             P.Pplus = A.pm.size();
             CS.Cplus = A.csm.size();
+            S.max_ids = A.graph.size()+1;
             break;
         case 8:
-            A.PipeFilter(pm);
+            A.PipeFilter(A.pm);
             break;
         case 9:
-            A.CsFilter(csm);
+            A.CsFilter(A.csm);
             break;
         case 10:
-            A.PBatchEdit(pm);
+            A.PBatchEdit(A.pm);
             break;
         case 11:
-            A.CsBatchEdit(csm);
+            A.CsBatchEdit(A.csm);
             break;
         case 12: {
             create_graph(A);

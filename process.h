@@ -14,8 +14,20 @@ using namespace std;
 class All
 {
 public:
+	struct System 
+	{
+		static int max_ids;
+		int id;
+		System() {
+			id = max_ids++;
+		}
+		int id_ent;
+		int id_ex;
+		int id_pip;
+	};
 	unordered_map <int, Pipes> pm;
 	unordered_map <int, CStation> csm;
+	unordered_map <int, System> sys;
 
 	int check_exist(int x);
 
@@ -37,11 +49,11 @@ public:
 
     void SaveParameters (unordered_map <int, Pipes>& pm, unordered_map <int, CStation>& csm);
 
-    void LoadParameters (unordered_map <int, Pipes>& pm, unordered_map <int, CStation>& csm);
+    void LoadParameters (unordered_map <int, Pipes>& pm, unordered_map <int, CStation>& csm,  unordered_map<int, System>& gr);
 
     void ShowCsParameters (unordered_map <int, CStation>& csm);
 
-    void CsEdit (unordered_map <int, CStation>& csm);
+    void CsEdit (unordered_map <int, CStation>& csm, unordered_map<int, System>& gr);
 
     void EditWorkshops(int id, unordered_map <int, CStation>& csm);
 
@@ -49,7 +61,7 @@ public:
 
     void CsBatchEdit (unordered_map <int, CStation>& csm);
 
-    void PipeEdit(unordered_map <int, Pipes>& pm);
+    void PipeEdit(unordered_map <int, Pipes>& pm, unordered_map<int, System>& gr);
 
     void ShowPipeParameters (unordered_map <int, Pipes>& pm);
 
@@ -57,16 +69,6 @@ public:
 
     void PBatchEdit (unordered_map <int, Pipes>& pm);
 
-	struct System {
-		static int max_ids;
-		int id;
-		System() {
-			id = max_ids++;
-		}
-		int id_ent;
-		int id_ex;
-		int id_pip;
-	};
 	unordered_map <int, System> graph;
 
     unordered_map <int, list<System>> Graph_l;
@@ -78,4 +80,6 @@ public:
 	friend istream& operator >> (istream& in, All& gts);
 
 	friend ostream& operator<<(ostream& out, unordered_set<int> s);
+
+	friend ifstream& operator >> (ifstream& fcin, All::System& tr);
 };
