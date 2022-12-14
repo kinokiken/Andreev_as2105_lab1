@@ -10,7 +10,7 @@
 #include <unordered_set>
 using namespace std;
 
-int All::check_exist(int x) {
+int Graph::check_exist(int x) {
     while (csm.find(x) == csm.end()) {
         cout << "Нет такой КС, введите другой индекс" << endl;
         x = GetLimValue(0, INT_MAX);
@@ -18,13 +18,13 @@ int All::check_exist(int x) {
     return x;
 }
 
-ifstream& operator >> (ifstream& fcin, All::System& tr) 
+ifstream& operator >> (ifstream& fcin, Graph::System& tr) 
 {
     fcin >> tr.id >> tr.id_ent  >> tr.id_ex >> tr.id_pip;
     return fcin;
 }
 
-int All::check_p(int x) {
+int Graph::check_p(int x) {
     int j = 0;
     if (graph.size() != 0) {
         for (auto& i : graph) {
@@ -35,9 +35,9 @@ int All::check_p(int x) {
     return j;
 }
 
-int All::System::max_ids = 0;
+int Graph::System::max_ids = 0;
 
-int All::check_graph(int x) {
+int Graph::check_graph(int x) {
     while (check_p(x) >= csm[x].GetPshops()) {
         cout << "Выберите другую КС" << endl;
         x = GetLimValue(0, INT_MAX);
@@ -46,7 +46,7 @@ int All::check_graph(int x) {
     return x;
 }
 
-bool All::check_used(int x, int y) 
+bool Graph::check_used(int x, int y) 
 {
     int k = 0;
     for (auto& i : graph) 
@@ -63,7 +63,7 @@ bool All::check_used(int x, int y)
             return false;
 }
 
-bool All::check_i(int x) {
+bool Graph::check_i(int x) {
     int n = 0;
     for (auto& i : graph)
     {
@@ -82,7 +82,7 @@ bool All::check_i(int x) {
     }
 }
 
-int All::edge(float x) {
+int Graph::edge(float x) {
     int k = -1;
     for (auto& i : pm) 
     {
@@ -97,7 +97,7 @@ int All::edge(float x) {
     return k;
 }
 
-void All::topologicalSortUtil(int V, unordered_map<int, int>& visited, stack<int>& SortedV) 
+void Graph::topologicalSortUtil(int V, unordered_map<int, int>& visited, stack<int>& SortedV) 
 {
     visited[V] = 1;
     list<System>::iterator i;
@@ -119,7 +119,7 @@ void All::topologicalSortUtil(int V, unordered_map<int, int>& visited, stack<int
         cout << SortedV.top()<<endl;
 }
 
-void All::topologicalSort()
+void Graph::topologicalSort()
 {
     stack <int> SortedV;
     unordered_map <int, int> visited;
@@ -145,14 +145,14 @@ void All::topologicalSort()
     }
 }
 
-void All::sort() 
+void Graph::sort() 
 {
-    All A;
+    Graph A;
     A.fill_graphl(graph);
     topologicalSort();
 }
 
-int All::Menu()
+int Graph::Menu()
 {
     int MenuChoice;
     cout << "\n 1. Добавить трубу\n 2. Добавить КС\n 3. Просмотр всех объектов\n 4. Редактировать трубу\n 5. Редактировать КС " << endl;
@@ -167,7 +167,7 @@ int All::Menu()
     return MenuChoice;
 }
 
-void All::SaveParameters (unordered_map <int, Pipes>& pm, unordered_map <int, CStation>& csm)
+void Graph::SaveParameters (unordered_map <int, Pipes>& pm, unordered_map <int, CStation>& csm)
 {
     string filename;
     ofstream file;
@@ -197,7 +197,7 @@ void All::SaveParameters (unordered_map <int, Pipes>& pm, unordered_map <int, CS
     file.close();
 }
 
-void All::LoadParameters (unordered_map <int, Pipes>& pm, unordered_map <int, CStation>& csm,  unordered_map<int, System>& gr)
+void Graph::LoadParameters (unordered_map <int, Pipes>& pm, unordered_map <int, CStation>& csm,  unordered_map<int, System>& gr)
 {
     int i, a , b, c;
     ifstream file;
@@ -206,7 +206,7 @@ void All::LoadParameters (unordered_map <int, Pipes>& pm, unordered_map <int, CS
     csm.clear();
     Pipes p;
     CStation cs;
-    All::System sys;
+    Graph::System sys;
     cout << "Из какого файла брать данные?" << endl;
     cin >> filename;
     file.open(filename + ".txt");
@@ -242,7 +242,7 @@ void All::LoadParameters (unordered_map <int, Pipes>& pm, unordered_map <int, CS
     file.close();         
 }
 
-void All::ShowCsParameters (unordered_map <int, CStation>& csm)
+void Graph::ShowCsParameters (unordered_map <int, CStation>& csm)
 {   
     if (csm.size() !=0)
     {
@@ -258,7 +258,7 @@ void All::ShowCsParameters (unordered_map <int, CStation>& csm)
     } 
 }
 
-void All::CsEdit (unordered_map <int, CStation>& csm, unordered_map<int, System>& gr)
+void Graph::CsEdit (unordered_map <int, CStation>& csm, unordered_map<int, System>& gr)
 {
     int id;
     if (csm.size()==0)
@@ -274,7 +274,7 @@ void All::CsEdit (unordered_map <int, CStation>& csm, unordered_map<int, System>
             id = IdCheck(csm);
             auto cs = csm.find(id);
             csm.erase(cs);
-            for (int i = 0; i < gr.size()+1; ++i)
+            for (int i = 0; i <= gr.size()+1; ++i)
             {
                 auto a = gr.cbegin();
                 while (a != gr.cend()) 
@@ -297,7 +297,7 @@ void All::CsEdit (unordered_map <int, CStation>& csm, unordered_map<int, System>
     }
 }
 
-void All::EditWorkshops(int id, unordered_map <int, CStation>& csm)
+void Graph::EditWorkshops(int id, unordered_map <int, CStation>& csm)
 {
     int AddRemoveWorkshop;
     int a;
@@ -347,7 +347,7 @@ void All::EditWorkshops(int id, unordered_map <int, CStation>& csm)
     }
 }
 
-unordered_set <int> All::CsFilter (unordered_map <int, CStation>& csm)
+unordered_set <int> Graph::CsFilter (unordered_map <int, CStation>& csm)
 {
     int choice;
     int percent;
@@ -424,7 +424,7 @@ unordered_set <int> All::CsFilter (unordered_map <int, CStation>& csm)
     return CIndx;
 }
 
-void All::CsBatchEdit (unordered_map <int, CStation>& csm)
+void Graph::CsBatchEdit (unordered_map <int, CStation>& csm)
 {
     int choice;
     unordered_set <int> set;
@@ -491,7 +491,7 @@ void All::CsBatchEdit (unordered_map <int, CStation>& csm)
     }  
 }
 
-void All::PipeEdit(unordered_map <int, Pipes>& pm, unordered_map<int, System>& gr)
+void Graph::PipeEdit(unordered_map <int, Pipes>& pm, unordered_map<int, System>& gr)
 {
     int id;
     if (pm.size()==0) 
@@ -536,7 +536,7 @@ void All::PipeEdit(unordered_map <int, Pipes>& pm, unordered_map<int, System>& g
     }
 }
 
-void All::ShowPipeParameters (unordered_map <int, Pipes>& pm)
+void Graph::ShowPipeParameters (unordered_map <int, Pipes>& pm)
 {
     if (pm.size() !=0) 
     {
@@ -552,7 +552,7 @@ void All::ShowPipeParameters (unordered_map <int, Pipes>& pm)
     }    
 }
 
-unordered_set <int> All::PipeFilter (unordered_map <int, Pipes>& pm)
+unordered_set <int> Graph::PipeFilter (unordered_map <int, Pipes>& pm)
 {
     unordered_set <int> PIndx;
     int choice;
@@ -608,7 +608,7 @@ unordered_set <int> All::PipeFilter (unordered_map <int, Pipes>& pm)
     return PIndx;
 }
 
-void All::PBatchEdit (unordered_map <int, Pipes>& pm)
+void Graph::PBatchEdit (unordered_map <int, Pipes>& pm)
 {
     int choice;
     int rep;
@@ -683,9 +683,9 @@ ostream& operator<<(ostream& out, unordered_set<int> s) {
     return out;
 }
 
-istream& operator >>(istream& in, All& gts) 
+istream& operator >>(istream& in, Graph& gts) 
 {
-    All::System sys;
+    Graph::System sys;
     cout << gts.csm;
     cout << "Выберите номер КС на входе: " << endl;
     sys.id_ent = GetLimValue(0, INT_MAX);
@@ -731,11 +731,61 @@ istream& operator >>(istream& in, All& gts)
     return in;
 }
 
-void All::fill_graphl(unordered_map<int, All::System>& sys) 
+void Graph::fill_graphl(unordered_map<int, Graph::System>& sys) 
 {
     Graph_l.clear();
     for (auto& e : sys)
     {
         Graph_l[e.second.id_ent].push_back(e.second);
     }
+}
+
+void Graph::create_graph() 
+{
+    Graph c;
+    if (graph.size() != 0) 
+    {
+        cout << "Связи: " << endl;
+        for (auto& [i, j] : graph)
+            cout << i << ") " << j.id_ent << " " << j.id_ex << " " << j.id_pip << endl;
+    }
+    cout << "\nЧто сделать: 1. Присоединить 2. Отсоединить 3. Топологическая сортировка\n" << endl;
+    int chose = GetLimValue(1, 3);
+    if (chose == 1) 
+    {
+        if ((csm.size() < 2) or (pm.size() < 1))
+            cout << "Недостаточно объектов для создания сети\n" << endl;
+        else
+            cin >> c;
+    }
+    else if (chose == 3)
+    {
+        fill_graphl(graph);
+        sort();
+    }
+    else
+    {
+        if (graph.size() != 0) {
+            cout << "Введите номер КС на входе: " << endl;
+            int ent = GetLimValue(0, CStation::Cplus);
+            cout << "Введите номер КС на выходе: " << endl;
+            int ext = GetLimValue(0, CStation::Cplus);
+            if (ent == ext) 
+            {
+                cout << "Выберите другую КС!: ";
+                ext = GetLimValue(0, CStation::Cplus);
+            }
+            auto a = graph.cbegin();
+            while (a != graph.cend()) {
+                if (((*a).second.id_ent == ent) and ((*a).second.id_ex == ext)) {
+                    graph.erase(a);
+                    break;
+                }
+                a++;
+            }
+        }
+    }
+    cout << endl;
+    for (auto& [i, j] : graph)
+        cout << i << ") " << j.id_ent << " " << j.id_ex << " " << j.id_pip << endl;
 }

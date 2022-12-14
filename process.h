@@ -11,7 +11,7 @@
 #include "cs.h"
 using namespace std;
 
-class All
+class Graph
 {
 public:
 	struct System 
@@ -25,6 +25,9 @@ public:
 		int id_ex;
 		int id_pip;
 	};
+	Pipes P;
+	CStation CS;
+    Graph::System S;
 	unordered_map <int, Pipes> pm;
 	unordered_map <int, CStation> csm;
 	unordered_map <int, System> sys;
@@ -77,9 +80,11 @@ public:
 
 	void fill_graphl(unordered_map<int, System>& sys);
 
-	friend istream& operator >> (istream& in, All& gts);
+	void create_graph();
+
+	friend istream& operator >> (istream& in, Graph& gts);
 
 	friend ostream& operator<<(ostream& out, unordered_set<int> s);
 
-	friend ifstream& operator >> (ifstream& fcin, All::System& tr);
+	friend ifstream& operator >> (ifstream& fcin, Graph::System& tr);
 };
